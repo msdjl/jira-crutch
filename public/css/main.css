@@ -1,0 +1,21 @@
+body {
+	background-color: #fff;
+	padding: 20px 0px;
+}
+.description {
+	max-width: 100%;
+}
+.deleteButton {
+	top: 0px;
+	right: 0px;
+	position: absolute;
+}
+.subtask {
+	position: relative;
+}
+.well {
+	overflow: hidden;
+}
+.container {
+	opacity: 0;
+}
