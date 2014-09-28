@@ -58,7 +58,7 @@ app.post('/login', function (req, res) {
 			return true;
 		}
 		c.isAuthorized = true;
-		c.displayName = issue[0].displayName;
+		c.displayName = issue[0].displayName || '';
 		res.cookie('displayName', c.displayName);
 		res.cookie('isAuthorized', true);
 		res.end('ok');
