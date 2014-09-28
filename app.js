@@ -54,7 +54,7 @@ app.post('/login', function (req, res) {
 	jira.searchUsers(c.username, undefined, undefined, undefined, undefined, function(error, issue) {
 		if (error) {
 			console.log(error);
-			res.end(error);
+			res.status(401).end('Unauthorized!');
 			return true;
 		}
 		c.isAuthorized = true;
