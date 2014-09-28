@@ -1,0 +1,9 @@
+{
+	"name": "jira-crutch",
+	"private": "true",
+	"dependencies": {
+		"bootstrap": "latest",
+		"jquery": "1",
+		"angular-latest": "latest"
+	}
+}

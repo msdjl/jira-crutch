@@ -2,21 +2,38 @@
 <html ng-app="app">
 <head>
 	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/bower/bootstrap/dist/css/bootstrap.min.css">
 	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.2/angular.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.2/angular-route.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.2/angular-animate.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.2/angular-cookies.min.js"></script>
+	<link rel="stylesheet" href="/bower/bootstrap/dist/css/bootstrap-theme.min.css">
+	<script src="/bower/jquery/dist/jquery.js"></script>
+	<script src="/bower/bootstrap/dist/js/bootstrap.js"></script>
+	<script src="/bower/angular-latest/build/angular.js"></script>
+	<script src="/bower/angular-latest/build/angular-route.js"></script>
+	<script src="/bower/angular-latest/build/angular-animate.js"></script>
+	<script src="/bower/angular-latest/build/angular-cookies.js"></script>
 	<script src="js/main.js"></script>
 
 	<link rel="stylesheet" href="css/main.css">
 
 </head>
 <body ng-controller="appCtrl">
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="#"><span class="glyphicon glyphicon-heart"></span> jira-crutch</a>
+		</div>
+		<ul class="nav navbar-nav">
+			<li><a ng-href="/#/login" ng-click="logout()">Logout</a></li>
+		</ul>
+		<form class="navbar-form navbar-right" role="search" ng-controller="HomeController">
+			<div class="form-group">
+				<input type="text" class="form-control" placeholder="Search issue" ng-model="issue">
+			</div>
+			<button type="submit" class="btn btn-default" ng-click="openIssue()"><span class="glyphicon glyphicon-search"></span></button>
+		</form>
+	</div>
+</nav>
 
 <ng-view></ng-view>
 
