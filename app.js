@@ -51,14 +51,14 @@ app.post('/login', function (req, res) {
 
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
 
-	jira.searchUsers(c.username, undefined, undefined, undefined, undefined, function(error, issue) {
+	jira.searchUsers(c.username, undefined, undefined, undefined, undefined, function(error, users) {
 		if (error) {
 			console.log(error);
 			res.status(401).end('Unauthorized!');
 			return true;
 		}
 		c.isAuthorized = true;
-		c.displayName = issue[0].displayName || '';
+		c.displayName = (users[0] && users[0].displayName) ? users[0].displayName : 'error';
 		res.cookie('displayName', c.displayName);
 		res.cookie('isAuthorized', true);
 		res.end('ok');
