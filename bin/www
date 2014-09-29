@@ -12,19 +12,21 @@ var server = app.listen(app.get('port'), function() {
 var fs = require('fs');
 var http = require('http');
 var https = require('https');
-var privateKey  = fs.readFileSync('../../sslcert/ssl.key', 'utf8');
-var certificate = fs.readFileSync('../../sslcert/ssl.crt', 'utf8');
 
-var credentials = {key: privateKey, cert: certificate};
 var app = require('../app');
 
 app.set('port', process.env.PORT || 80);
-app.set('portS', process.env.PORTS || 443);
-
-// your express configuration here
+app.set('httpsPort', process.env.HTTPSPORT || 443);
+app.set('excludeHttps', (process.env.EXCLUDEHTTPS == 'true') || false);
 
 var httpServer = http.createServer(app);
-var httpsServer = https.createServer(credentials, app);
 
 httpServer.listen(app.get('port'));
-httpsServer.listen(app.get('portS'));
+
+if (!app.get('excludeHttps')) {
+    var privateKey  = fs.readFileSync('../../sslcert/ssl.key', 'utf8');
+    var certificate = fs.readFileSync('../../sslcert/ssl.crt', 'utf8');
+    var credentials = {key: privateKey, cert: certificate};
+    var httpsServer = https.createServer(credentials, app);
+    httpsServer.listen(app.get('httpsPort'));
+}
