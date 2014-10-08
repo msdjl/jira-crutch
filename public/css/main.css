@@ -1,9 +1,9 @@
 body {
-	background-color: #fff;
 	padding: 60px 0px 20px 0px;
 	background-color: rgb(254, 254, 254);
 }
 #bckgrimg {
+    display: block;
 	position: fixed;
 	right: 0px;
 	bottom: -30px;
@@ -58,4 +58,37 @@ body {
 	margin-bottom: 10px;
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
+}
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+#overlap {
+    display: none;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    background-color: white;
+    opacity: 0.5;
+}
+#progress {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 300px;
+    margin: 0 0 0 -150px;
+    z-index: 1000;
+    padding: 0 0 0 0;
+}
+#throbber {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 100px;
+    height: 100px;
+    margin: 0 -50px 0 -50px;
+    z-index: 1000;
 }

@@ -31,7 +31,7 @@
 	<div id="subtask{{$index}}" class="well subtask" ng-repeat="subtask in subtasks">
 		<button class="btn btn-danger deleteButton" ng-click="removeSubtask()"><span class="glyphicon glyphicon-remove"></span></button>
 		<div class="row">
-			<h4>New Subtask</h4>
+			<h4>New Subtask {{subtask.fields.__saved ? '. ' + subtask.fields.__statusText + ' ' + subtask.fields.__key : ''}}</h4>
 		</div>
 
 		<div class="row">
@@ -62,11 +62,12 @@
 		<div class="row">
 			<div class="form-group">
 				<label>Estimate</label>
-				<input type="text" class="form-control col-xs-2" ng-model="subtask.fields.__estimate">
+				<input type="text" class="form-control col-xs-2" ng-model="subtask.fields.originalEstimate">
 			</div>
 		</div>
 	</div>
 
 	<button class="btn btn-primary col-xs-2" ng-click="addSubtask()"><span class="glyphicon glyphicon-plus"></span> Add another</button>
-	<button class="btn btn-primary col-xs-2 col-xs-offset-8"><span class="glyphicon glyphicon-floppy-save"></span> Save</button>
+	<button class="btn btn-primary col-xs-2 col-xs-offset-8" ng-click="save()"><span class="glyphicon glyphicon-floppy-save"></span> Save</button>
+	<progressbar id="progress" class="progress-striped active" max="reqs" value="resps" type="danger"><i>{{resps}} / {{reqs}}</i></progressbar>
 </div>

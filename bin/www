@@ -1,18 +1,9 @@
 #!/usr/bin/env node
-/*var debug = require('debug')('jira-crutch');
-var app = require('../app');
 
-app.set('port', process.env.PORT || 80);
-app.set('portS', process.env.PORTS || 443);
-
-var server = app.listen(app.get('port'), function() {
-  debug('Express server listening on port ' + server.address().port);
-});*/
-
+var debug = require('debug')('jira-crutch');
 var fs = require('fs');
 var http = require('http');
 var https = require('https');
-
 var app = require('../app');
 
 app.set('port', process.env.PORT || 80);
@@ -20,7 +11,6 @@ app.set('httpsPort', process.env.HTTPSPORT || 443);
 app.set('excludeHttps', (process.env.EXCLUDEHTTPS == 'true') || false);
 
 var httpServer = http.createServer(app);
-
 httpServer.listen(app.get('port'));
 
 if (!app.get('excludeHttps')) {

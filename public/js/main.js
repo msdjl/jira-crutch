@@ -1,4 +1,4 @@
-var app = angular.module ('app', ['ngRoute', 'ngAnimate', 'ngCookies']).config(function($routeProvider) {
+var app = angular.module ('app', ['ngRoute', 'ngAnimate', 'ngCookies', 'ui.bootstrap']).config(function($routeProvider) {
 	$routeProvider.when('/', {
 		templateUrl: 'templates/home.html',
 		controller: 'HomeController'
@@ -59,12 +59,18 @@ app.controller ('HomeController', function ($scope, $http, $location) {
 
 app.controller ('LoginController', function ($scope, $http, $location) {
 	$scope.login = function () {
+		$('#overlap').show();
+		$('#throbber').show();
 		$http({method: 'POST', url: '/login/', data: {
 			username: $scope.username,
 			password: $scope.password
 		}}).success(function() {
+			$('#overlap').hide();
+			$('#throbber').hide();
 			$location.path('/');
 		}).error(function() {
+			$('#overlap').hide();
+			$('#throbber').hide();
 			alert('error');
 			console.log(arguments);
 		});
@@ -84,7 +90,10 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 		$scope.subtasks.push({
 			fields: {
 				summary: $scope.issue.fields.summary,
-				__type: newType
+				__type: newType,
+				__statusText: 'Saved as',
+				__key: '',
+				__saved: false
 			}
 		});
 		if (!notScroll) {
@@ -139,7 +148,77 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 	$scope.changeTaskType = function (type) {
 		this.subtask.fields.__type = type;
 	};
+	$scope.reqs = $scope.max = 0;
+	$scope.resps = $scope.dynamic = 0;
+	$scope.save = function () {
+		$scope.reqs = $scope.max = $scope.subtasks.length;
+		$scope.resps = 0;
+		var main = $scope.issue;
+		console.log($scope.subtasks.length + ' subtask need create');
+		if ($scope.subtasks.length > 0) {
+			$('#overlap').show();
+			$('#throbber').show();
+			for (var i in $scope.subtasks) {
+				var sub = $scope.subtasks[i];
+				var newSub = {
+					fields: {
+						summary: sub.fields.__type + ' ' + sub.fields.summary,
+						description: sub.fields.description,
+						project: {
+							key: main.fields.project.key
+						},
+						issuetype: {
+							id: 56 // test task
+						},
+						customfield_13245: main.fields.customfield_13245 || [
+							{id: '17706'}
+						], // brick || other
+						parent: {
+							key: main.key
+						},
+						customfield_10890: main.fields.customfield_10890 || [
+							{id: '17669'}
+						], // functional area || other
+						fixVersions: main.fields.fixVersions,
+						timetracking: {
+							originalEstimate: sub.fields.originalEstimate || '0h',
+							remainingEstimate: sub.fields.originalEstimate || '0h'
+						}
+					}
+				};
 
+				$http({method: 'POST', url: '/rest/api/latest/subtask/', data: {issue: newSub}}).success(function () {
+					var res = arguments[0];
+					//alert(JSON.stringify(res));
+					$scope.resps++;
+					$scope.dynamic++;
+					//sub.fields.__key = res.key;
+					//sub.fields.__saved = true;
+					if ($scope.reqs == $scope.resps) {
+						$('#throbber').hide();
+						$('#overlap').hide();
+					}
+					console.log(Math.round($scope.resps * (100 / $scope.reqs)) + '%');
+				}).error(function (err) {
+					//alert(JSON.stringify(err));
+					console.log(err);
+					$scope.resps++;
+					$scope.dynamic++;
+					if ($scope.reqs == $scope.resps) {
+						$('#throbber').hide();
+						$('#overlap').hide();
+					}
+					console.log(Math.round($scope.resps * (100 / $scope.reqs)) + '%');
+				});
+			}
+		}
+		else {
+			alert('0 subtasks here. Nothing to do.');
+		}
+	};
+
+	$('#overlap').show();
+	$('#throbber').show();
 	$http({method: 'GET', url: '/rest/api/latest/issue/' + $routeParams.issue}).success(function() {
 		var res = arguments[0];
 	//	if (typeof (res) == 'string') {
@@ -147,11 +226,16 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 	//	}
 		$scope.issue = res;
 		$scope.addSubtask(true);
-		$( ".container" ).animate({
+		$('#overlap').hide();
+		$('#throbber').hide();
+		/*$( ".container" ).animate({
 			opacity: 1
-		}, 300);
+		}, 300);*/
 	}).error(function() {
-		alert('error');
+		$('#overlap').hide();
+		$('#throbber').hide();
 		console.log(arguments);
+		alert('error');
+		$location.path('/');
 	});
 });

@@ -10,6 +10,8 @@ var app = express();
 
 var JiraApi = require('jira').JiraApi;
 
+app.set('demo', process.env.DEMO ? 'demo' : '');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -84,11 +86,35 @@ app.get('/rest/api/latest/issue/:id', function (req, res) {
 
 	jira.findIssue(req.params.id, function(error, issue) {
 		if (error) {
-			res.end(error);
+			res.status(400).end(error);
 			return true;
 		}
 		res.json(issue);
 	});
+});
+
+app.post('/rest/api/latest/subtask', function (req, res) {
+
+    var c = req.session.credentials;
+    if (!c || !c.isAuthorized) {
+        res.status(401).end('Unauthorized!');
+        return true;
+    }
+
+    var s = req.body.issue;
+    if (!s) {
+        // bad request
+    }
+
+    var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
+
+    jira.addNewIssue(s, function(error, issue) {
+        if (error) {
+            res.status(400).json(error);
+            return true;
+        }
+        res.json(issue);
+    });
 });
 
 // catch 404 and forward to error handler
