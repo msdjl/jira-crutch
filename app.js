@@ -10,7 +10,7 @@ var app = express();
 
 var JiraApi = require('jira').JiraApi;
 
-app.set('demo', process.env.DEMO ? 'demo' : '');
+app.set('demo', process.env.DEMO == 'true' ? 'demo' : '');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -38,7 +38,7 @@ app.post('/login', function (req, res) {
 	var username = req.body.username || '';
 	var password = req.body.password || '';
 	var protocol = req.body.protocol || 'https';
-	var hostname = req.body.hostname || 'jira.returnonintelligence.com';
+	var hostname = req.body.hostname || app.get('demo') + 'jira.returnonintelligence.com';
 	var port = req.body.port || 443;
 	var apiVersion = req.body.apiVersion || 2;
 
