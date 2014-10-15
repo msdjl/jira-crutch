@@ -11,13 +11,17 @@ var app = angular.module ('app', ['ngRoute', 'ngAnimate', 'ngCookies', 'ui.boots
 		templateUrl: 'templates/issue.html',
 		controller: 'IssueController'
 	});
+	$routeProvider.when('/checklistmaker', {
+		templateUrl: 'templates/checklist_maker.html',
+		controller: 'ChecklistMakerController'
+	});
 	$routeProvider.otherwise({
 		redirectTo: '/'
 	});
 
 });
 
-app.controller ('appCtrl', function ($scope, $location, $cookies) {
+app.controller ('appCtrl', function ($scope, $location, $cookies, AuthService) {
 	$scope.$on('$locationChangeStart', function (event, newUrl, oldUrl) {
 		console.log(arguments)
 	});
@@ -29,7 +33,7 @@ app.controller ('appCtrl', function ($scope, $location, $cookies) {
 app.factory ('AuthService', function () {
 	var isAuthenticated = false;
 	return {
-		logged: function () {
+		isAuthorized: function () {
 			return isAuthenticated;
 		},
 		login: function () {
@@ -39,6 +43,26 @@ app.factory ('AuthService', function () {
 			isAuthenticated = false;
 		}
 	}
+});
+
+app.controller ('ChecklistMakerController', function ($scope, $http) {
+	$scope.query = '';
+	$scope.jout = '';
+	$scope.findIssues = function () {
+		$('#overlap').show();
+		$('#throbber').show();
+		$http({method: 'GET', url: '/rest/api/latest/search?jql=' + $scope.query}).success(function() {
+			var res = arguments[0];
+			$scope.jout = res;
+			$('#overlap').hide();
+			$('#throbber').hide();
+		}).error(function() {
+			$('#overlap').hide();
+			$('#throbber').hide();
+			console.log(arguments);
+			alert('error');
+		});
+	};
 });
 
 app.controller ('HomeController', function ($scope, $http, $location) {

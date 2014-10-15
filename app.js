@@ -34,6 +34,26 @@ app.get('/', function (req, res) {
 	res.sendFile(__dirname + '/public/index.html');
 });
 
+app.get('/rest/api/latest/search', function (req, res) {
+	var jql = req.query.jql;
+
+	var c = req.session.credentials;
+	if (!c || !c.isAuthorized) {
+		res.status(401).end('Unauthorized!');
+		return true;
+	}
+
+	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
+
+	jira.searchJira(jql, { maxResults: 1000 }, function(error, result) {
+		if (error) {
+			res.status(400).end(error);
+			return true;
+		}
+		res.json(result);
+	});
+});
+
 app.post('/login', function (req, res) {
 	var username = req.body.username || '';
 	var password = req.body.password || '';
@@ -52,6 +72,19 @@ app.post('/login', function (req, res) {
 	};
 
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
+
+/*	jira.getCurrentUser(function (error, user) {
+		if (error) {
+			console.log(error);
+			res.status(401).end(error);
+			return true;
+		}
+		c.isAuthorized = true;
+		c.displayName = (user && user.displayName) ? user.displayName : 'error';
+		res.cookie('displayName', c.displayName);
+		res.cookie('isAuthorized', true);
+		res.end('ok');
+	});*/
 
 	jira.searchUsers(c.username, undefined, undefined, undefined, undefined, function(error, users) {
 		if (error) {

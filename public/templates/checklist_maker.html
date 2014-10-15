@@ -1,0 +1,10 @@
+<textarea ng-model="query"></textarea> <br>
+<button ng-click="findIssues()">Go</button> <br>
+
+<table border="1" width="100%">
+	<tr ng-repeat="issue in jout.issues">
+		<td>{{issue.key}}</td>
+		<td>{{issue.fields.summary}}</td>
+		<td><pre>{{issue.fields.description}}</pre></td>
+	</tr>
+</table>
