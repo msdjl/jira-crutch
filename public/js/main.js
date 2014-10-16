@@ -47,8 +47,8 @@ app.factory ('AuthService', function () {
 
 app.controller ('ChecklistMakerController', function ($scope, $http) {
 	$scope.query = '';
-	$scope.steps_delimeters = '*steps*\nsteps';
-	$scope.er_delimeters = '*er*\ner:';
+	$scope.steps_delimeters = 'steps';
+	$scope.er_delimeters = 'expected result\ner';
 	$scope.jout = {};
 	$scope.findIssues = function () {
 		$('#overlap').show();
@@ -65,40 +65,45 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 			alert('error');
 		});
 	};
-	$scope.getSteps = function (text) {
-		var i, pos, st_dels, er_dels, res;
-		st_dels = $scope.steps_delimeters.split('\n');
-		er_dels = $scope.er_delimeters.split('\n');
-		for (i in st_dels) {
-			pos = text.toLowerCase().indexOf(st_dels[i]);
-			if (pos != -1) {
-				res = text.substring(pos + st_dels[i].length);
-				break;
-			}
+	$scope.extendDelimeters = function (arr) {
+		var res = [], tmp = [];
+		for (i in arr) {
+			tmp.push('*' + arr[i] + ':*');
+			tmp.push('*' + arr[i] + '*:');
+			tmp.push('*' + arr[i] + '*');
+			tmp.push(arr[i] + ':');
+			tmp.push(arr[i]);
 		}
-		if (!res) {
-			res = text;
-		}
-		for (i in er_dels) {
-			pos = res.toLowerCase().indexOf(er_dels[i]);
-			if (pos != -1) {
-				res = res.substring(0, pos);
-				break;
-			}
+		for (i in tmp) {
+			res.push('\n' + tmp[i]);
+			res.push(tmp[i]);
 		}
 		return res;
 	};
-	$scope.getERs = function (text) {
-		var i, pos, er_dels, res;
-		er_dels = $scope.er_delimeters.split('\n');
-		res = text;
-		for (i in er_dels) {
-			pos = res.toLowerCase().indexOf(er_dels[i]);
+	$scope.getDelimeterPosition = function (text, dels_arr) {
+		var i, pos, dels = $scope.extendDelimeters(dels_arr.split('\n'));
+		for (i in dels) {
+			pos = text.toLowerCase().indexOf(dels[i].toLowerCase());
 			if (pos != -1) {
-				res = res.substring(pos + er_dels[i].length);
 				break;
 			}
 		}
+		return {
+			start: pos,
+			end: pos + dels[i].length
+		};
+	};
+	$scope.getSteps = function (text) {
+		var res,
+			st_pos = $scope.getDelimeterPosition(text, $scope.steps_delimeters),
+			er_pos = $scope.getDelimeterPosition(text, $scope.er_delimeters);
+		res = text.substring(st_pos.start != -1 ? st_pos.end : 0, er_pos.start != -1 ? er_pos.start : undefined);
+		return res;
+	};
+	$scope.getERs = function (text) {
+		var res,
+			er_pos = $scope.getDelimeterPosition(text, $scope.er_delimeters);
+		res = text.substring(er_pos.start != -1 ? er_pos.end : undefined);
 		return res;
 	};
 });
