@@ -47,7 +47,9 @@ app.factory ('AuthService', function () {
 
 app.controller ('ChecklistMakerController', function ($scope, $http) {
 	$scope.query = '';
-	$scope.jout = '';
+	$scope.steps_delimeters = '*steps*\nsteps';
+	$scope.er_delimeters = '*er*\ner:';
+	$scope.jout = {};
 	$scope.findIssues = function () {
 		$('#overlap').show();
 		$('#throbber').show();
@@ -62,6 +64,42 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 			console.log(arguments);
 			alert('error');
 		});
+	};
+	$scope.getSteps = function (text) {
+		var i, pos, st_dels, er_dels, res;
+		st_dels = $scope.steps_delimeters.split('\n');
+		er_dels = $scope.er_delimeters.split('\n');
+		for (i in st_dels) {
+			pos = text.toLowerCase().indexOf(st_dels[i]);
+			if (pos != -1) {
+				res = text.substring(pos + st_dels[i].length);
+				break;
+			}
+		}
+		if (!res) {
+			res = text;
+		}
+		for (i in er_dels) {
+			pos = res.toLowerCase().indexOf(er_dels[i]);
+			if (pos != -1) {
+				res = res.substring(0, pos);
+				break;
+			}
+		}
+		return res;
+	};
+	$scope.getERs = function (text) {
+		var i, pos, er_dels, res;
+		er_dels = $scope.er_delimeters.split('\n');
+		res = text;
+		for (i in er_dels) {
+			pos = res.toLowerCase().indexOf(er_dels[i]);
+			if (pos != -1) {
+				res = res.substring(pos + er_dels[i].length);
+				break;
+			}
+		}
+		return res;
 	};
 });
 

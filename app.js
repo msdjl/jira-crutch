@@ -45,7 +45,7 @@ app.get('/rest/api/latest/search', function (req, res) {
 
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
 
-	jira.searchJira(jql, { maxResults: 1000 }, function(error, result) {
+	jira.searchJira(jql, { maxResults: 1000, fields: ['summary', 'description', 'customfield_13342'] }, function(error, result) {
 		if (error) {
 			res.status(400).end(error);
 			return true;
