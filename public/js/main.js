@@ -72,7 +72,7 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 			tmp.push('*' + arr[i] + '*:');
 			tmp.push('*' + arr[i] + '*');
 			tmp.push(arr[i] + ':');
-			tmp.push(arr[i]);
+			//tmp.push(arr[i]);
 		}
 		for (i in tmp) {
 			res.push('\n' + tmp[i]);
@@ -80,10 +80,10 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 		}
 		return res;
 	};
-	$scope.getDelimeterPosition = function (text, dels_arr) {
+	$scope.getDelimeterPosition = function (text, dels_arr, from) {
 		var i, pos, dels = $scope.extendDelimeters(dels_arr.split('\n'));
 		for (i in dels) {
-			pos = text.toLowerCase().indexOf(dels[i].toLowerCase());
+			pos = text.toLowerCase().indexOf(dels[i].toLowerCase(), from);
 			if (pos != -1) {
 				break;
 			}
@@ -96,13 +96,14 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 	$scope.getSteps = function (text) {
 		var res,
 			st_pos = $scope.getDelimeterPosition(text, $scope.steps_delimeters),
-			er_pos = $scope.getDelimeterPosition(text, $scope.er_delimeters);
+			er_pos = $scope.getDelimeterPosition(text, $scope.er_delimeters, st_pos.start != -1 ? st_pos.end : undefined);
 		res = text.substring(st_pos.start != -1 ? st_pos.end : 0, er_pos.start != -1 ? er_pos.start : undefined);
 		return res;
 	};
 	$scope.getERs = function (text) {
 		var res,
-			er_pos = $scope.getDelimeterPosition(text, $scope.er_delimeters);
+			st_pos = $scope.getDelimeterPosition(text, $scope.steps_delimeters),
+			er_pos = $scope.getDelimeterPosition(text, $scope.er_delimeters, st_pos.start != -1 ? st_pos.end : undefined);
 		res = text.substring(er_pos.start != -1 ? er_pos.end : undefined);
 		return res;
 	};

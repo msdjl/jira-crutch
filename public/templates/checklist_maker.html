@@ -8,6 +8,7 @@
 
 <table border="1" width="100%" ng-if="jout.issues">
     <thead>
+        <td><b>#</b></td>
         <td><b>Steps</b></td>
         <td><b>Expected Result</b></td>
         <td><b>Cross-browser</b></td>
@@ -15,6 +16,7 @@
     </thead>
     <tbody>
         <tr ng-repeat="issue in jout.issues">
+            <td></td>
             <td>{{getSteps(issue.fields.description)}}</td>
             <td>{{getERs(issue.fields.description)}}</td>
             <td>{{issue.fields.customfield_13342.value}}</td>
