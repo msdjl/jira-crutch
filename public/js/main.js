@@ -47,8 +47,8 @@ app.factory ('AuthService', function () {
 
 app.controller ('ChecklistMakerController', function ($scope, $http) {
 	$scope.query = '';
-	$scope.steps_delimeters = 'steps';
-	$scope.er_delimeters = 'expected result\ner';
+	$scope.steps_Delimiters = 'steps';
+	$scope.er_Delimiters = 'expected result\ner';
 	$scope.jout = {};
 	$scope.findIssues = function () {
 		$('#overlap').show();
@@ -65,7 +65,7 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 			alert('error');
 		});
 	};
-	$scope.extendDelimeters = function (arr) {
+	$scope.extendDelimiters = function (arr) {
 		var res = [], tmp = [];
 		for (i in arr) {
 			tmp.push('*' + arr[i] + ':*');
@@ -80,8 +80,8 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 		}
 		return res;
 	};
-	$scope.getDelimeterPosition = function (text, dels_arr, from) {
-		var i, pos, dels = $scope.extendDelimeters(dels_arr.split('\n'));
+	$scope.getDelimiterPosition = function (text, dels_arr, from) {
+		var i, pos, dels = $scope.extendDelimiters(dels_arr.split('\n'));
 		for (i in dels) {
 			pos = text.toLowerCase().indexOf(dels[i].toLowerCase(), from);
 			if (pos != -1) {
@@ -95,15 +95,15 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 	};
 	$scope.getSteps = function (text) {
 		var res,
-			st_pos = $scope.getDelimeterPosition(text, $scope.steps_delimeters),
-			er_pos = $scope.getDelimeterPosition(text, $scope.er_delimeters, st_pos.start != -1 ? st_pos.end : undefined);
+			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters),
+			er_pos = $scope.getDelimiterPosition(text, $scope.er_Delimiters, st_pos.start != -1 ? st_pos.end : undefined);
 		res = text.substring(st_pos.start != -1 ? st_pos.end : 0, er_pos.start != -1 ? er_pos.start : undefined);
 		return res;
 	};
 	$scope.getERs = function (text) {
 		var res,
-			st_pos = $scope.getDelimeterPosition(text, $scope.steps_delimeters),
-			er_pos = $scope.getDelimeterPosition(text, $scope.er_delimeters, st_pos.start != -1 ? st_pos.end : undefined);
+			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters),
+			er_pos = $scope.getDelimiterPosition(text, $scope.er_Delimiters, st_pos.start != -1 ? st_pos.end : undefined);
 		res = text.substring(er_pos.start != -1 ? er_pos.end : undefined);
 		return res;
 	};
