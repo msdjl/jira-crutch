@@ -21,7 +21,7 @@ var app = angular.module ('app', ['ngRoute', 'ngAnimate', 'ngCookies', 'ui.boots
 
 });
 
-app.controller ('appCtrl', function ($scope, $location, $cookies, AuthService) {
+app.controller ('appCtrl', function ($scope, $location, $cookies) {
 	$scope.$on('$locationChangeStart', function (event, newUrl, oldUrl) {
 		console.log(arguments)
 	});
@@ -54,8 +54,7 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 		$('#overlap').show();
 		$('#throbber').show();
 		$http({method: 'GET', url: '/rest/api/latest/search?jql=' + $scope.query}).success(function() {
-			var res = arguments[0];
-			$scope.jout = res;
+			$scope.jout = arguments[0];
 			$('#overlap').hide();
 			$('#throbber').hide();
 		}).error(function() {
@@ -66,7 +65,7 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 		});
 	};
 	$scope.extendDelimiters = function (arr) {
-		var res = [], tmp = [];
+		var res = [], tmp = [], i;
 		for (i in arr) {
 			tmp.push('*' + arr[i] + ':*');
 			tmp.push('*' + arr[i] + '*:');
@@ -145,7 +144,7 @@ app.controller ('LoginController', function ($scope, $http, $location) {
 	};
 });
 
-app.controller ('IssueController', function ($scope, $http, $location, $routeParams, AuthService) {
+app.controller ('IssueController', function ($scope, $http, $location, $routeParams) {
 	//$location.path('/login');
 	$scope.issue = {};
 	$scope.subtasks = [];
@@ -177,7 +176,7 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 		var str = task.fields.summary.toLowerCase();
 		var filerTo = ['[tc]', '[test]', '[req]', '[auto]'];
 		var styles = ['success', 'warning', 'info', 'danger'];
-		for (f in filerTo) {
+		for (var f in filerTo) {
 			if (str.indexOf(filerTo[f]) > -1)
 				return styles[f];
 		}
@@ -185,7 +184,7 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 	};
 
 	$scope.removeSubtask = function () {
-		for (s in $scope.subtasks) {
+		for (var s in $scope.subtasks) {
 			if (this.subtask['$$hashKey'] == $scope.subtasks[s]['$$hashKey']) {
 				(function() {
 					$( "#subtask" + s ).animate({
@@ -204,10 +203,10 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 		}
 	};
 
-	$scope.subtasksfilter = function (actual, expected) {
+	$scope.subtasksfilter = function (actual) {
 		var str = actual.fields.summary.toLowerCase();
 		var filerTo = ['[tc]', '[test]', '[req]', '[auto]'];
-		for (f in filerTo) {
+		for (var f in filerTo) {
 			if (str.indexOf(filerTo[f]) > -1)
 				return true;
 		}
@@ -256,7 +255,7 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 				};
 
 				$http({method: 'POST', url: '/rest/api/latest/subtask/', data: {issue: newSub}}).success(function () {
-					var res = arguments[0];
+					//var res = arguments[0];
 					//alert(JSON.stringify(res));
 					$scope.resps++;
 					$scope.dynamic++;
@@ -288,11 +287,7 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 	$('#overlap').show();
 	$('#throbber').show();
 	$http({method: 'GET', url: '/rest/api/latest/issue/' + $routeParams.issue}).success(function() {
-		var res = arguments[0];
-	//	if (typeof (res) == 'string') {
-		//	res = JSON.parse(res);
-	//	}
-		$scope.issue = res;
+		$scope.issue = arguments[0];
 		$scope.addSubtask(true);
 		$('#overlap').hide();
 		$('#throbber').hide();
