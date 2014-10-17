@@ -48,8 +48,16 @@ app.factory ('AuthService', function () {
 app.controller ('ChecklistMakerController', function ($scope, $http) {
 	$scope.query = '';
 	$scope.steps_Delimiters = 'steps';
-	$scope.er_Delimiters = 'expected result\ner';
+	$scope.er_Delimiters = 'expected results\nexpected result\ners\ner';
 	$scope.jout = {};
+	$scope.fixLinewrap = function () {
+		var i, tds = $('td');
+		for (i in tds) {
+			if (tds[i].innerText) {
+				tds[i].innerHTML = tds[i].innerHTML.split('\n').join('<br>');
+			}
+		}
+	};
 	$scope.findIssues = function () {
 		$('#overlap').show();
 		$('#throbber').show();
@@ -74,7 +82,9 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 			//tmp.push(arr[i]);
 		}
 		for (i in tmp) {
+			res.push('\n' + tmp[i] + '\n');
 			res.push('\n' + tmp[i]);
+			res.push(tmp[i] + '\n');
 			res.push(tmp[i]);
 		}
 		return res;
