@@ -4,7 +4,7 @@
 <textarea ng-model="steps_Delimiters" style="width: 100%; height: 100px"></textarea> <br>
 &nbsp;&nbsp; разделители для экспектед резалтов <br>
 <textarea ng-model="er_Delimiters" style="width: 100%; height: 100px"></textarea> <br>
-<button ng-click="findIssues()">Go</button> <br>
+<button ng-click="findIssues()">Go</button> <button ng-click="fixLinewrap()">Fix linewrap</button> <br>
 
 <table border="1" width="100%" ng-if="jout.issues">
     <thead>
