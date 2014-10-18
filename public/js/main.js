@@ -21,13 +21,25 @@ var app = angular.module ('app', ['ngRoute', 'ngAnimate', 'ngCookies', 'ui.boots
 
 });
 
-app.controller ('appCtrl', function ($scope, $location, $cookies) {
-	$scope.$on('$locationChangeStart', function (event, newUrl, oldUrl) {
-		console.log(arguments)
-	});
-	if (!$cookies.isAuthorized) {
+app.controller ('appCtrl', function ($scope, $location, $cookies, $http) {
+	$scope.isAuthorized = true;
+	$http({method: 'GET', url: '/isAuthorized'}).success(function() {
+		$scope.isAuthorized = true;
+	}).error(function() {
+		//event.preventDefault();
+		$scope.isAuthorized = false;
 		$location.path('/login');
-	}
+	});
+	$scope.$on('$locationChangeStart', function (event, newUrl, oldUrl) {
+		console.log(arguments);
+		if (newUrl.indexOf('/login') == -1) {
+			if (!$scope.isAuthorized) {
+				event.preventDefault();
+				$location.path('/login');
+			}
+		}
+	});
+
 });
 
 app.factory ('AuthService', function () {
@@ -134,10 +146,12 @@ app.controller ('LoginController', function ($scope, $http, $location) {
 		}}).success(function() {
 			$('#overlap').hide();
 			$('#throbber').hide();
+			$scope.$parent.isAuthorized = true;
 			$location.path('/');
 		}).error(function() {
 			$('#overlap').hide();
 			$('#throbber').hide();
+			$scope.$parent.isAuthorized = false;
 			alert('error');
 			console.log(arguments);
 		});

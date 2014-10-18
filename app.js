@@ -34,6 +34,19 @@ app.get('/', function (req, res) {
 	res.sendFile(__dirname + '/public/index.html');
 });
 
+app.get('/isAuthorized', function (req, res) {
+	var c = req.session.credentials;
+	if (!c || !c.isAuthorized) {
+		res.status(401).end('Unauthorized!');
+	}
+	else {
+		res.json({
+			isAuthorized: true,
+			name: c.displayName
+		});
+	}
+});
+
 app.get('/rest/api/latest/search', function (req, res) {
 	var jql = req.query.jql;
 
@@ -68,7 +81,8 @@ app.post('/login', function (req, res) {
 		protocol: protocol,
 		port: port,
 		hostname: hostname,
-		apiVersion: apiVersion
+		apiVersion: apiVersion,
+		isAuthorized: false
 	};
 
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);

@@ -17,7 +17,7 @@
     <tbody>
         <tr ng-repeat="issue in jout.issues">
             <td></td>
-            <td>{{getSteps(issue.fields.description)}}</td>
+            <td ng-bind="getSteps(issue.fields.description)"></td>
             <td>{{getERs(issue.fields.description)}}</td>
             <td>{{issue.fields.customfield_13342.value}}</td>
             <td>{{issue.key}}</td>
