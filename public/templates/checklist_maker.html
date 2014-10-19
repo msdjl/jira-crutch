@@ -1,26 +1,55 @@
-&nbsp;&nbsp; jql запрос <br>
-<textarea ng-model="query" style="width: 100%; height: 100px"></textarea> <br>
-&nbsp;&nbsp; разделители для степов <br>
-<textarea ng-model="steps_Delimiters" style="width: 100%; height: 100px"></textarea> <br>
-&nbsp;&nbsp; разделители для экспектед резалтов <br>
-<textarea ng-model="er_Delimiters" style="width: 100%; height: 100px"></textarea> <br>
-<button ng-click="findIssues()">Go</button> <button ng-click="fixLinewrap()">Fix linewrap</button> <br>
+<div class="container">
+	<div class="row">
+		<div class="form-group">
+			<label>JQL query</label>
+			<textarea class="form-control" rows="3" ng-model="query"></textarea>
+		</div>
+	</div>
 
-<table border="1" width="100%" ng-if="jout.issues">
-    <thead>
-        <td><b>#</b></td>
-        <td><b>Steps</b></td>
-        <td><b>Expected Result</b></td>
-        <td><b>Cross-browser</b></td>
-        <td><b>ID</b></td>
-    </thead>
-    <tbody>
-        <tr ng-repeat="issue in jout.issues">
-            <td></td>
-            <td ng-bind="getSteps(issue.fields.description)"></td>
-            <td>{{getERs(issue.fields.description)}}</td>
-            <td>{{issue.fields.customfield_13342.value}}</td>
-            <td>{{issue.key}}</td>
-        </tr>
-    </tbody>
-</table>
+	<div class="row">
+		<button class="btn btn-primary col-xs-2" ng-click="findIssues()">Draw a table</button>
+		<div class="col-xs-8">
+			<p class="text-success" ng-if="jout.total">Shown {{jout.issues.length}} of {{jout.total}} issues</p>
+		</div>
+		<button class="btn btn-default col-xs-2" ng-click="toggleShowSettings()">Settings</button>
+	</div>
+
+	<div class="row">
+		<div class="form-group" ng-show="showSettings">
+			<br>
+			<label>Delimiters for steps</label>
+			<textarea class="form-control" rows="5" ng-model="steps_Delimiters"></textarea> <br>
+
+			<label>Delimiters for expected results</label>
+			<textarea class="form-control" rows="5" ng-model="er_Delimiters"></textarea>
+		</div>
+		<br>
+	</div>
+
+	<div class="row">
+		<table border="1" width="100%" ng-if="jout.issues">
+			<thead>
+				<td><b>#</b></td>
+				<td><b>Steps</b></td>
+				<td><b>Expected Result</b></td>
+				<td><b>Cross-browser</b></td>
+				<td><b>ID</b></td>
+			</thead>
+			<tbody>
+				<tr ng-repeat="issue in jout.issues">
+					<td></td>
+					<td>
+						<div ng-repeat="st_line in getSteps(issue.fields.description).split('\n') track by $index">{{st_line}}</div>
+					</td>
+					<td>
+						<div ng-repeat="er_line in getERs(issue.fields.description).split('\n') track by $index">{{er_line}}</div>
+					</td>
+					<td>
+						<div ng-if="issue.fields.customfield_13342.value == 'Yes'">Yes</div>
+					</td>
+					<td>{{issue.key}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

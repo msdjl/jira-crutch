@@ -62,13 +62,9 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 	$scope.steps_Delimiters = 'steps';
 	$scope.er_Delimiters = 'expected results\nexpected result\ners\ner';
 	$scope.jout = {};
-	$scope.fixLinewrap = function () {
-		var i, tds = $('td');
-		for (i in tds) {
-			if (tds[i].innerText) {
-				tds[i].innerHTML = tds[i].innerHTML.split('\n').join('<br>');
-			}
-		}
+	$scope.showSettings = false;
+	$scope.toggleShowSettings = function () {
+		$scope.showSettings = !$scope.showSettings;
 	};
 	$scope.findIssues = function () {
 		$('#overlap').show();
