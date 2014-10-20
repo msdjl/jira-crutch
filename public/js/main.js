@@ -59,10 +59,15 @@ app.factory ('AuthService', function () {
 
 app.controller ('ChecklistMakerController', function ($scope, $http) {
 	$scope.query = '';
+	$scope.resFilter = {
+		include: '',
+		exclude: ''
+	};
 	$scope.steps_Delimiters = [ 'steps', 'actions' ].join('\n');
 	$scope.er_Delimiters = [ 'expected results', 'expected result', 'ers', 'er' ].join('\n');
 	$scope.hidePreconditions = true;
 	$scope.hideNumbers = true;
+	$scope.hideSummary = true;
 	$scope.jout = {};
 	$scope.showSettings = false;
 	$scope.toggleShowSettings = function () {

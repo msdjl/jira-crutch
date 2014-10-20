@@ -37,6 +37,11 @@
 					<input type="checkbox" ng-model="hideNumbers"> Hide numbers
 				</label>
 			</div>
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" ng-model="hideSummary"> Hide summary column
+				</label>
+			</div>
 		</div>
 		<br>
 	</div>
@@ -45,6 +50,7 @@
 		<table border="1" width="100%" ng-if="jout.issues">
 			<thead>
 				<td><b>#</b></td>
+				<td ng-if="!hideSummary"><b>Description</b></td>
 				<td><b>Steps</b></td>
 				<td><b>Expected Result</b></td>
 				<td><b>Comment/Post-condition</b></td>
@@ -54,6 +60,9 @@
 				<tr ng-repeat="issue in jout.issues | filter:resFilter.include">
 					<td>
 						<div ng-if="!hideNumbers">{{$index + 1}}</div>
+					</td>
+					<td ng-if="!hideSummary">
+						{{issue.fields.summary}}
 					</td>
 					<td>
 						<div ng-repeat="st_line in getSteps(issue.fields.description).split('\n') track by $index">{{st_line}}</div>
