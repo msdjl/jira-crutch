@@ -8,7 +8,7 @@ body {
 	right: 0px;
 	bottom: -30px;
 }
-.description {
+textarea {
 	max-width: 100%;
 }
 .deleteButton {
