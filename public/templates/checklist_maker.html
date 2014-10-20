@@ -21,7 +21,18 @@
 			<textarea class="form-control" rows="5" ng-model="steps_Delimiters"></textarea> <br>
 
 			<label>Delimiters for expected results</label>
-			<textarea class="form-control" rows="5" ng-model="er_Delimiters"></textarea>
+			<textarea class="form-control" rows="5" ng-model="er_Delimiters"></textarea> <br>
+
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" ng-model="hidePreconditions"> Hide preconditions
+				</label>
+			</div>
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" ng-model="hideNumbers"> Hide numbers
+				</label>
+			</div>
 		</div>
 		<br>
 	</div>
@@ -32,12 +43,14 @@
 				<td><b>#</b></td>
 				<td><b>Steps</b></td>
 				<td><b>Expected Result</b></td>
-				<td><b>Cross-browser</b></td>
-				<td><b>ID</b></td>
+				<td><b>Comment/Post-condition</b></td>
+				<td><b>Issue key</b></td>
 			</thead>
 			<tbody>
 				<tr ng-repeat="issue in jout.issues">
-					<td></td>
+					<td>
+						<div ng-if="!hideNumbers">{{$index + 1}}</div>
+					</td>
 					<td>
 						<div ng-repeat="st_line in getSteps(issue.fields.description).split('\n') track by $index">{{st_line}}</div>
 					</td>
@@ -45,7 +58,7 @@
 						<div ng-repeat="er_line in getERs(issue.fields.description).split('\n') track by $index">{{er_line}}</div>
 					</td>
 					<td>
-						<div ng-if="issue.fields.customfield_13342.value == 'Yes'">Yes</div>
+						<div ng-if="issue.fields.customfield_13342.value == 'Yes'">Cross-browser</div>
 					</td>
 					<td>{{issue.key}}</td>
 				</tr>

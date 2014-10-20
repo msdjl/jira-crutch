@@ -59,8 +59,10 @@ app.factory ('AuthService', function () {
 
 app.controller ('ChecklistMakerController', function ($scope, $http) {
 	$scope.query = '';
-	$scope.steps_Delimiters = 'steps';
-	$scope.er_Delimiters = 'expected results\nexpected result\ners\ner';
+	$scope.steps_Delimiters = [ 'steps', 'actions' ].join('\n');
+	$scope.er_Delimiters = [ 'expected results', 'expected result', 'ers', 'er' ].join('\n');
+	$scope.hidePreconditions = true;
+	$scope.hideNumbers = true;
 	$scope.jout = {};
 	$scope.showSettings = false;
 	$scope.toggleShowSettings = function () {
@@ -114,7 +116,7 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 		var res,
 			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters),
 			er_pos = $scope.getDelimiterPosition(text, $scope.er_Delimiters, st_pos.start != -1 ? st_pos.end : undefined);
-		res = text.substring(st_pos.start != -1 ? st_pos.end : 0, er_pos.start != -1 ? er_pos.start : undefined);
+		res = text.substring(st_pos.start != -1 && $scope.hidePreconditions ? st_pos.end : 0, er_pos.start != -1 ? er_pos.start : undefined);
 		return res;
 	};
 	$scope.getERs = function (text) {
