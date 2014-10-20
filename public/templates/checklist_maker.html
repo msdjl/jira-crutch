@@ -4,6 +4,10 @@
 			<label>JQL query</label>
 			<textarea class="form-control" rows="3" ng-model="query"></textarea>
 		</div>
+		<div class="form-group">
+			<label>Quick filter</label>
+			<input class="form-control" type="text" ng-model="resFilter.include">
+		</div>
 	</div>
 
 	<div class="row">
@@ -47,7 +51,7 @@
 				<td><b>Issue key</b></td>
 			</thead>
 			<tbody>
-				<tr ng-repeat="issue in jout.issues">
+				<tr ng-repeat="issue in jout.issues | filter:resFilter.include">
 					<td>
 						<div ng-if="!hideNumbers">{{$index + 1}}</div>
 					</td>
