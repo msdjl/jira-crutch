@@ -29,12 +29,12 @@
 
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" ng-model="hidePreconditions"> Hide preconditions
+					<input type="checkbox" ng-model="hideNumbers"> Hide numbers
 				</label>
 			</div>
 			<div class="checkbox">
 				<label>
-					<input type="checkbox" ng-model="hideNumbers"> Hide numbers
+					<input type="checkbox" ng-model="hidePreconditions"> Hide preconditions column
 				</label>
 			</div>
 			<div class="checkbox">
@@ -50,7 +50,8 @@
 		<table border="1" width="100%" ng-if="jout.issues">
 			<thead>
 				<td><b>#</b></td>
-				<td ng-if="!hideSummary"><b>Description</b></td>
+				<td ng-if="!hideSummary"><b>Summary</b></td>
+				<td ng-if="!hidePreconditions"><b>Preconditions</b></td>
 				<td><b>Steps</b></td>
 				<td><b>Expected Result</b></td>
 				<td><b>Comment/Post-condition</b></td>
@@ -63,6 +64,9 @@
 					</td>
 					<td ng-if="!hideSummary">
 						{{issue.fields.summary}}
+					</td>
+					<td ng-if="!hidePreconditions">
+						<div ng-repeat="pr_line in getPreconditions(issue.fields.description).split('\n') track by $index">{{pr_line}}</div>
 					</td>
 					<td>
 						<div ng-repeat="st_line in getSteps(issue.fields.description).split('\n') track by $index">{{st_line}}</div>

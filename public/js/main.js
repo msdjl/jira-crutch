@@ -117,11 +117,17 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 			end: pos + dels[i].length
 		};
 	};
+	$scope.getPreconditions = function (text) {
+		var res,
+			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters);
+		res = text.substring(0, st_pos.start != -1 ? st_pos.start : undefined);
+		return res;
+	};
 	$scope.getSteps = function (text) {
 		var res,
 			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters),
 			er_pos = $scope.getDelimiterPosition(text, $scope.er_Delimiters, st_pos.start != -1 ? st_pos.end : undefined);
-		res = text.substring(st_pos.start != -1 && $scope.hidePreconditions ? st_pos.end : 0, er_pos.start != -1 ? er_pos.start : undefined);
+		res = text.substring(st_pos.start != -1 ? st_pos.end : 0, er_pos.start != -1 ? er_pos.start : undefined);
 		return res;
 	};
 	$scope.getERs = function (text) {
