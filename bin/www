@@ -9,9 +9,12 @@ var app = require('../app');
 app.set('port', process.env.PORT || 80);
 app.set('httpsPort', process.env.HTTPSPORT || 443);
 app.set('excludeHttps', (process.env.EXCLUDEHTTPS == 'true') || false);
+app.set('excludeHttp', (process.env.EXCLUDEHTTP == 'true') || false);
 
-var httpServer = http.createServer(app);
-httpServer.listen(app.get('port'));
+if (!app.get('excludeHttp')) {
+	var httpServer = http.createServer(app);
+	httpServer.listen(app.get('port'));
+}
 
 if (!app.get('excludeHttps')) {
     var privateKey  = fs.readFileSync('../../sslcert/ssl.key', 'utf8');
