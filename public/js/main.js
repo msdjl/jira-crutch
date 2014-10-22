@@ -63,7 +63,7 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 		include: '',
 		exclude: ''
 	};
-	$scope.steps_Delimiters = [ 'steps', 'actions' ].join('\n');
+	$scope.steps_Delimiters = [ 'steps', 'actions', 'action' ].join('\n');
 	$scope.er_Delimiters = [ 'expected results', 'expected result', 'ers', 'er' ].join('\n');
 	$scope.hidePreconditions = true;
 	$scope.hideNumbers = true;
