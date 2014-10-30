@@ -142,33 +142,33 @@ app.get('/rest/api/latest/issue/:id', function (req, res) {
 
 app.post('/rest/api/latest/subtask', function (req, res) {
 
-    var c = req.session.credentials;
-    if (!c || !c.isAuthorized) {
-        res.status(401).end('Unauthorized!');
-        return true;
-    }
+	var c = req.session.credentials;
+	if (!c || !c.isAuthorized) {
+		res.status(401).end('Unauthorized!');
+		return true;
+	}
 
-    var s = req.body.issue;
-    if (!s) {
-        // bad request
-    }
+	var s = req.body.issue;
+	if (!s) {
+		// bad request
+	}
 
-    var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
+	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
 
-    jira.addNewIssue(s, function(error, issue) {
-        if (error) {
-            res.status(400).json(error);
-            return true;
-        }
-        res.json(issue);
-    });
+	jira.addNewIssue(s, function(error, issue) {
+		if (error) {
+			res.status(400).json(error);
+			return true;
+		}
+		res.json(issue);
+	});
 });
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+	var err = new Error('Not Found');
+	err.status = 404;
+	next(err);
 });
 
 // error handlers
@@ -176,23 +176,23 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function(err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
+	app.use(function(err, req, res, next) {
+		res.status(err.status || 500);
+		res.render('error', {
+			message: err.message,
+			error: err
+		});
+	});
 }
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
+	res.status(err.status || 500);
+	res.render('error', {
+		message: err.message,
+		error: {}
+	});
 });
 
 module.exports = app;

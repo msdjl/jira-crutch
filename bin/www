@@ -17,9 +17,9 @@ if (!app.get('excludeHttp')) {
 }
 
 if (!app.get('excludeHttps')) {
-    var privateKey  = fs.readFileSync('../../sslcert/ssl.key', 'utf8');
-    var certificate = fs.readFileSync('../../sslcert/ssl.crt', 'utf8');
-    var credentials = {key: privateKey, cert: certificate};
-    var httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(app.get('httpsPort'));
+	var privateKey  = fs.readFileSync('../../sslcert/ssl.key', 'utf8');
+	var certificate = fs.readFileSync('../../sslcert/ssl.crt', 'utf8');
+	var credentials = {key: privateKey, cert: certificate};
+	var httpsServer = https.createServer(credentials, app);
+	httpsServer.listen(app.get('httpsPort'));
 }
