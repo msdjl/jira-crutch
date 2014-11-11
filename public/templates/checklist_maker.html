@@ -45,7 +45,13 @@
 		</div>
 		<br>
 	</div>
-
+	<div class="row">
+		<span ng-if="jout.issues">
+			<b>List of issues' keys presented in table. You can use it for bulk linking to main Test Case</b>
+		</span>
+		<br>
+		<span ng-repeat="issue in jout.issues | filter:resFilter.include">{{issue.key}} </span>
+	</div>
 	<div class="row">
 		<table border="1" width="100%" ng-if="jout.issues">
 			<thead>
