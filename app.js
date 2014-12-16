@@ -7,7 +7,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var https = require('https');
 var app = express();
-var Nightmare = require('nightmare');
 var phantom = require('phantom');
 
 var JiraApi = require('jira').JiraApi;
@@ -193,34 +192,89 @@ app.get('/getwikipageversion', function (req, res) {
 							page.open(historyLink, function () {
 								page.evaluate(function () {
 									return jQuery('tbody tr:first')[0].id.replace('rowForVersion', '');
-								}, function (pageVersion) {
-									page.renderBase64('PNG', function (img) {
-										res.end('<a href="data:image/png;base64,' + img + '">' + pageVersion + '</a>');
+								}, function (version) {
+									//page.renderBase64('PNG', function (img) {
+										res.end('<a href="data:image/png;base64,' + '' + '">' + version + '</a>');
 										ph.exit();
-									});
+									//});
 								});
 							});
 						});
 					});
 				}, c.username, c.password);
-
 			});
 		});
 	});
-	/*new Nightmare({ webSecurity: false })
-		.goto(pageUrl)
-		.type('#os_username', c.username)
-		.type('#os_password', c.password)
-		.click('#loginButton')
-		.wait(10000)
-		.evaluate(function () { return jQuery('#action-view-history-link')[0].click(); }, function (res) { pageUrlWithId = res; })
-		.wait(10000)
-		.evaluate(function () { return jQuery('tbody tr:first')[0].id.replace('rowForVersion', ''); }, function (res) { pageVersion = res; })
-		.run(function (err, nightmare) {
-			if (err) return console.log(err);
-			console.log('Done!');
-			res.json({version: pageVersion});
-		});*/
+});
+
+app.get('/getwikipagescreenshot', function (req, res) {
+	var c = req.session.credentials;
+	if (!c || !c.isAuthorized) {
+		res.status(401).end('Unauthorized!');
+		return true;
+	}
+	var pageId = req.query.pageId;
+	var pageVersion = req.query.pageVersion;
+	var baseUrl = 'https://wiki.returnonintelligence.com/';
+	var loginPage = 'dologin.action';
+	var viewPage = 'pages/viewpage.action';
+	var historyPage = 'pages/viewpreviousversions.action';
+	var query = '?pageId=';
+	var loginSettings = {
+		os_username: c.username,
+		os_password: c.password,
+		os_destination: baseUrl + historyPage + query + pageId
+	};
+	var loginSettingsStr = '';
+	for (var i in loginSettings) {
+		loginSettingsStr += i + '=' + loginSettings[i] + '&';
+	}
+	phantom.create(function (ph) {
+		ph.createPage(function (page) {
+			page.set('viewportSize', {width: 1500, height: 1000});
+			page.open(baseUrl + loginPage, 'POST', loginSettingsStr, function () {
+				page.evaluate(function (pageVersion) {
+					return $('#rowForVersion' + pageVersion + ' a:first').attr('href').split('=')[1];
+				}, function (specifiedVersionId) {
+					page.open(baseUrl + viewPage + query + specifiedVersionId, function () {
+						page.evaluate(function () {
+							var content = document.getElementById('main').innerHTML;
+							document.body.innerHTML = content;
+							$('#comments-section').remove();
+							$('#likes-and-labels-container').remove();
+							$('#navigation').remove();
+							$('#page-history-warning').remove();
+							document.body.style.overflow = 'visible';
+							var tables = document.getElementsByClassName('table-wrap');
+							for (var i in tables) {
+								if (tables[i].style) {
+									tables[i].style.overflow = 'visible';
+								}
+							}
+							document.body.parentNode.style.padding = '10px';
+							document.body.style.backgroungColor = 'white';
+							document.body.parentNode.style.backgroundColor = 'white';
+
+							$('tbody tr').each(function (i, el) {
+								var r = Math.random();
+								if (r < 0.8) {
+									el.style.backgroundColor = 'rgb(223, 240, 216)';
+								}
+								else {
+									el.style.backgroundColor = 'rgb(242, 222, 222)';
+								}
+							});
+						}, function () {
+							page.renderBase64('PNG', function (img) {
+								res.end('<a href="data:image/png;base64,' + img + '">' + specifiedVersionId + '</a>');
+								ph.exit();
+							});
+						});
+					});
+				}, pageVersion);
+			});
+		});
+	});
 });
 
 // catch 404 and forward to error handler
