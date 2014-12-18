@@ -27,7 +27,7 @@ app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function(req, res, next) {
-	res.header("Access-Control-Allow-Origin", "https://wiki.returnonintelligence.com");
+	res.header("Access-Control-Allow-Origin", req.headers.origin);
 	res.header("Access-Control-Allow-Credentials", "true");
 	//res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
@@ -251,34 +251,7 @@ app.get('/getwikipagescreenshot', function (req, res) {
 					return $('#rowForVersion' + pageVersion + ' a:first').attr('href').split('=')[1];
 				}, function (specifiedVersionId) {
 					page.open(baseUrl + viewPage + query + specifiedVersionId, function () {
-						page.evaluate(function () {
-							var content = document.getElementById('main').innerHTML;
-							document.body.innerHTML = content;
-							$('#comments-section').remove();
-							$('#likes-and-labels-container').remove();
-							$('#navigation').remove();
-							$('#page-history-warning').remove();
-							document.body.style.overflow = 'visible';
-							var tables = document.getElementsByClassName('table-wrap');
-							for (var i in tables) {
-								if (tables[i].style) {
-									tables[i].style.overflow = 'visible';
-								}
-							}
-							document.body.parentNode.style.padding = '10px';
-							document.body.style.backgroungColor = 'white';
-							document.body.parentNode.style.backgroundColor = 'white';
-
-							$('tbody tr').each(function (i, el) {
-								var r = Math.random();
-								if (r < 0.8) {
-									el.style.backgroundColor = 'rgb(223, 240, 216)';
-								}
-								else {
-									el.style.backgroundColor = 'rgb(242, 222, 222)';
-								}
-							});
-						}, function () {
+						page.evaluate(fixWikiPage, function () {
 							page.renderBase64('PNG', function (img) {
 								res.end('<a href="data:image/png;base64,' + img + '">' + specifiedVersionId + '</a>');
 								ph.exit();
@@ -290,6 +263,35 @@ app.get('/getwikipagescreenshot', function (req, res) {
 		});
 	});
 });
+
+function fixWikiPage () {
+	var content = document.getElementById('main').innerHTML;
+	document.body.innerHTML = content;
+	$('#comments-section').remove();
+	$('#likes-and-labels-container').remove();
+	$('#navigation').remove();
+	$('#page-history-warning').remove();
+	document.body.style.overflow = 'visible';
+	var tables = document.getElementsByClassName('table-wrap');
+	for (var i in tables) {
+		if (tables[i].style) {
+			tables[i].style.overflow = 'visible';
+		}
+	}
+	document.body.parentNode.style.padding = '10px';
+	document.body.style.backgroungColor = 'white';
+	document.body.parentNode.style.backgroundColor = 'white';
+
+	$('tbody tr').each(function (i, el) {
+		var r = Math.random();
+		if (r < 0.8) {
+			el.style.backgroundColor = 'rgb(223, 240, 216)';
+		}
+		else {
+			el.style.backgroundColor = 'rgb(242, 222, 222)';
+		}
+	});
+}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
