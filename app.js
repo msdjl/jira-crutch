@@ -8,6 +8,21 @@ var bodyParser = require('body-parser');
 var https = require('https');
 var app = express();
 var phantom = require('phantom');
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/test');
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function (callback) {
+	// yay!
+});
+
+var MongoStore = require('connect-mongo')(session);
+app.use(session({
+	secret: 'superSecret',
+	store: new MongoStore({
+		url: 'mongodb://localhost/test'
+	})
+}));
 
 var JiraApi = require('jira').JiraApi;
 
@@ -22,7 +37,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({secret:'meow'}));
+//app.use(session({secret:'meow'}));
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -176,48 +191,6 @@ app.post('/rest/api/latest/subtask', function (req, res) {
 			return true;
 		}
 		res.json(issue);
-	});
-});
-
-app.get('/getwikipageversion', function (req, res) {
-	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
-	var pageUrl = req.query.url;
-	var pageUrlWithId = '';
-	var pageVersion = 0;
-
-	phantom.create(function (ph) {
-		ph.createPage(function (page) {
-			page.set('viewportSize', {width: 1500, height: 1000});
-			page.open(pageUrl, function () {
-				page.evaluate(function (login, password) {
-					$('#os_username')[0].value = login;
-					$('#os_password')[0].value = password;
-					$('#loginButton')[0].click();
-				}, function () {
-					page.set('onLoadFinished', function () {
-						page.set('onLoadFinished', function () {});
-						page.evaluate(function () {
-							return jQuery('#action-view-history-link')[0].href;
-						}, function (historyLink) {
-							page.open(historyLink, function () {
-								page.evaluate(function () {
-									return jQuery('tbody tr:first')[0].id.replace('rowForVersion', '');
-								}, function (version) {
-									//page.renderBase64('PNG', function (img) {
-										res.end('<a href="data:image/png;base64,' + '' + '">' + version + '</a>');
-										ph.exit();
-									//});
-								});
-							});
-						});
-					});
-				}, c.username, c.password);
-			});
-		});
 	});
 });
 
