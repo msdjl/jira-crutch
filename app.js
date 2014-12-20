@@ -9,12 +9,36 @@ var https = require('https');
 var app = express();
 var phantom = require('phantom');
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/test');
+mongoose.connect('mongodb://localhost/test', { keepAlive: 1 });
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
 	// yay!
 });
+
+var testSchema = mongoose.Schema({
+	testId: String,
+	testStatus: String,
+	createdAt: {type: Date, default: Date.now},
+	updatedAt: Date,
+	context: {type: mongoose.Schema.Types.ObjectId, ref: 'Context'}
+});
+testSchema.pre('save', function (next) {
+	this.updatedAt = new Date();
+	next();
+});
+
+var contextSchema = mongoose.Schema({
+	issueKey: String,
+	pageId: Number,
+	pageVersion: Number,
+	createdAt: {type: Date, default: Date.now},
+	tests: [{type: mongoose.Schema.Types.ObjectId, ref: 'Test'}]
+});
+
+var Test = mongoose.model('Test', testSchema);
+var Context = mongoose.model('Context', contextSchema);
+
 
 var MongoStore = require('connect-mongo')(session);
 app.use(session({
@@ -191,6 +215,111 @@ app.post('/rest/api/latest/subtask', function (req, res) {
 			return true;
 		}
 		res.json(issue);
+	});
+});
+
+app.get('/gettests', function (req, res) {
+	var c = req.session.credentials;
+	if (!c || !c.isAuthorized) {
+		res.status(401).end('Unauthorized!');
+		return true;
+	}
+	var pageId = req.query.pageId;
+	var pageVersion = req.query.pageVersion;
+	var issueKey = req.query.issueKey;
+	if (!pageId || !pageVersion || !issueKey) {
+		res.status(400).end('missing parameters');
+		return;
+	}
+	Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}).populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
+		if (err) {
+			res.status(500).end(err);
+			return;
+		}
+		if (doc) {
+			res.json({tests: doc.tests});
+		}
+		else {
+			res.json({});
+		}
+	});
+});
+
+app.post('/savetest', function (req, res) {
+	var c = req.session.credentials;
+	if (!c || !c.isAuthorized) {
+		res.status(401).end('Unauthorized!');
+		return true;
+	}
+	var test;
+	var pageId = req.body.pageId;
+	var pageVersion = req.body.pageVersion;
+	var issueKey = req.body.issueKey;
+	var testId = req.body.testId;
+	var testStatus = req.body.testStatus;
+	if (!pageId || !pageVersion || !issueKey || !testId || !testStatus) {
+		res.status(400).end('missing parameters');
+		return;
+	}
+	Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey})
+		.populate({path: 'tests', match: {testId: testId}}).exec(function (err, doc) {
+		if (err) {
+			res.status(500).end(err);
+			return;
+		}
+		if (doc) {
+			if (doc.tests[0]) {
+				doc.tests[0].testStatus = testStatus;
+				doc.tests[0].save(function (err, test) {
+					if (err) {
+						res.status(500).end(err);
+						return;
+					}
+					res.json({ testId: test.testId, testStatus: test.testStatus });
+				});
+			}
+			else {
+				test = new Test({testId: testId, testStatus: testStatus, context: doc});
+				test.save(function (err, test) {
+					if (err) {
+						res.status(500).end(err);
+						return;
+					}
+					doc.tests.push(test);
+					doc.save(function (err, doc) {
+						if (err) {
+							res.status(500).end(err);
+							return;
+						}
+						res.json({ testId: test.testId, testStatus: test.testStatus });
+					});
+				});
+			}
+		}
+		else {
+			var context = Context({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey});
+			context.save(function (err, doc) {
+				if (err) {
+					res.status(500).end(err);
+					return;
+				}
+				test = new Test({testId: testId, testStatus: testStatus, context: doc});
+				test.save(function (err, test) {
+					if (err) {
+						res.status(500).end(err);
+						return;
+					}
+					doc.tests.push(test);
+					doc.save(function (err, doc) {
+						if (err) {
+							res.status(500).end(err);
+							return;
+						}
+						res.json({ testId: test.testId, testStatus: test.testStatus });
+					});
+				});
+			});
+		}
 	});
 });
 
