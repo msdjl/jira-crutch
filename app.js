@@ -474,14 +474,14 @@ app.get('/getwikipagescreenshot', function (req, res) {
 								for (var i in doc.tests) {
 									tests[doc.tests[i].testId] = doc.tests[i].testStatus;
 								}
+								page.evaluate(fixWikiPage, function () {
+									page.renderBase64('PNG', function (img) {
+										res.end('<a href="data:image/png;base64,' + img + '">' + specifiedVersionId + '</a>');
+										ph.exit();
+									});
+								}, tests);
 							}
 						});
-						page.evaluate(fixWikiPage, function () {
-							page.renderBase64('PNG', function (img) {
-								res.end('<a href="data:image/png;base64,' + img + '">' + specifiedVersionId + '</a>');
-								ph.exit();
-							});
-						}, tests);
 					});
 				}, pageVersion);
 			});
