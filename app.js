@@ -367,8 +367,8 @@ app.post('/savetest', function (req, res) {
 	var pageVersion = req.body.pageVersion;
 	var issueKey = req.body.issueKey;
 	var testId = req.body.testId;
-	var testStatus = req.body.testStatus;
-	if (!pageId || !pageVersion || !issueKey || !testId || !testStatus) {
+	var testStatus = req.body.testStatus || '';
+	if (!pageId || !pageVersion || !issueKey || !testId) {
 		res.status(400).end('missing parameters');
 		return;
 	}
