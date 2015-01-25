@@ -441,6 +441,7 @@ app.get('/getwikipagescreenshot', function (req, res) {
 	}
 	var pageId = req.query.pageId;
 	var pageVersion = req.query.pageVersion;
+	var issueKey = req.query.issueKey;
 	var baseUrl = 'https://wiki.returnonintelligence.com/';
 	var loginPage = 'dologin.action';
 	var viewPage = 'pages/viewpage.action';
