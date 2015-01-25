@@ -481,7 +481,7 @@ app.get('/getwikipagescreenshot', function (req, res) {
 								res.end('<a href="data:image/png;base64,' + img + '">' + specifiedVersionId + '</a>');
 								ph.exit();
 							});
-						});
+						}, tests);
 					});
 				}, pageVersion);
 			});
@@ -489,7 +489,7 @@ app.get('/getwikipagescreenshot', function (req, res) {
 	});
 });
 
-function fixWikiPage () {
+function fixWikiPage (tests) {
 	var content = document.getElementById('main').innerHTML;
 	document.body.innerHTML = content;
 	$('#comments-section').remove();
