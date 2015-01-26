@@ -260,22 +260,11 @@ app.post('/testcomment', function (req, res) {
 	var pageId = req.query.pageId;
 	var pageVersion = req.query.pageVersion;
 	var issueKey = req.query.issueKey;
-	if (!pageId || !pageVersion || !issueKey) {
+	var comment = req.query.comment;
+	if (!pageId || !pageVersion || !issueKey || !comment) {
 		res.status(400).end('missing parameters');
 		return;
 	}
-	Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}).populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
-		if (err) {
-			res.status(500).end(err);
-			return;
-		}
-		if (doc) {
-			res.end(':)');
-		}
-		else {
-			res.end(':(');
-		}
-	});
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
 	jira.addComment(issueKey, comment, function(error) {
 		if (error) {
