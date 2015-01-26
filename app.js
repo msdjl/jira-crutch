@@ -257,12 +257,25 @@ app.post('/testcomment', function (req, res) {
 		res.status(401).end('Unauthorized!');
 		return true;
 	}
-	var issueKey = req.body.issueKey;
-	var comment = req.body.comment;
-	if (!issueKey || !comment) {
+	var pageId = req.query.pageId;
+	var pageVersion = req.query.pageVersion;
+	var issueKey = req.query.issueKey;
+	if (!pageId || !pageVersion || !issueKey) {
 		res.status(400).end('missing parameters');
 		return;
 	}
+	Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}).populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
+		if (err) {
+			res.status(500).end(err);
+			return;
+		}
+		if (doc) {
+			res.end(':)');
+		}
+		else {
+			res.end(':(');
+		}
+	});
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
 	jira.addComment(issueKey, comment, function(error) {
 		if (error) {
@@ -442,6 +455,10 @@ app.get('/getwikipagescreenshot', function (req, res) {
 	var pageId = req.query.pageId;
 	var pageVersion = req.query.pageVersion;
 	var issueKey = req.query.issueKey;
+	if (!pageId || !pageVersion || !issueKey) {
+		res.status(400).end('missing parameters');
+		return;
+	}
 	var baseUrl = 'https://wiki.returnonintelligence.com/';
 	var loginPage = 'dologin.action';
 	var viewPage = 'pages/viewpage.action';
@@ -480,6 +497,10 @@ app.get('/getwikipagescreenshot', function (req, res) {
 										ph.exit();
 									});
 								}, tests);
+							}
+							else {
+								res.end(':(');
+								ph.exit();
 							}
 						});
 					});
