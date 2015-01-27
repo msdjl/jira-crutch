@@ -257,10 +257,10 @@ app.post('/testcomment', function (req, res) {
 		res.status(401).end('Unauthorized!');
 		return true;
 	}
-	var pageId = req.query.pageId;
-	var pageVersion = req.query.pageVersion;
-	var issueKey = req.query.issueKey;
-	var comment = req.query.comment;
+	var pageId = req.body.pageId;
+	var pageVersion = req.body.pageVersion;
+	var issueKey = req.body.issueKey;
+	var comment = req.body.comment;
 	if (!pageId || !pageVersion || !issueKey || !comment) {
 		res.status(400).end('missing parameters');
 		return;
