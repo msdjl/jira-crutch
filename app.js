@@ -343,7 +343,8 @@ app.get('/gettests', function (req, res) {
 		res.status(400).end('missing parameters');
 		return;
 	}
-	Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}).populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
+	Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey})
+	.populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
 		if (err) {
 			res.status(500).end(err);
 			return;
@@ -471,7 +472,8 @@ app.get('/getwikipagescreenshot', function (req, res) {
 				}, function (specifiedVersionId) {
 					page.open(baseUrl + viewPage + query + specifiedVersionId, function () {
 						var tests = {};
-						Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}).populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
+						Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey})
+						.populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
 							if (err) {
 								res.status(500).end(err);
 								return;
@@ -514,7 +516,7 @@ function fixWikiPage (tests) {
 		}
 	}
 	document.body.parentNode.style.padding = '10px';
-	document.body.style.backgroungColor = 'white';
+	document.body.style.backgroundColor = 'white';
 	document.body.parentNode.style.backgroundColor = 'white';
 
 	$('tbody tr').each(function (n, el) {
