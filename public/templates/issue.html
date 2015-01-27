@@ -47,7 +47,19 @@
 							<li><a href="#" ng-click="changeTaskType('[auto] ')" onclick="return false;">[auto]</a></li>
 						</ul>
 					</div>
+
 					<input type="text" class="form-control" ng-model="subtask.fields.summary">
+
+					<div class="input-group-btn">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{subtask.fields.__priority}} <span class="caret"></span></button>
+						<ul class="dropdown-menu dropdown-menu-right" role="menu">
+							<li><a href="#" ng-click="changeTaskPriority('Blocker')" onclick="return false;">Blocker</a></li>
+							<li><a href="#" ng-click="changeTaskPriority('Critical')" onclick="return false;">Critical</a></li>
+							<li><a href="#" ng-click="changeTaskPriority('Major')" onclick="return false;">Major</a></li>
+							<li><a href="#" ng-click="changeTaskPriority('Minor')" onclick="return false;">Minor</a></li>
+							<li><a href="#" ng-click="changeTaskPriority('Trivial')" onclick="return false;">Trivial</a></li>
+						</ul>
+					</div>
 				</div>
 			</div>
 		</div>

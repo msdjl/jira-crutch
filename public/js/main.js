@@ -191,6 +191,7 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 			fields: {
 				summary: $scope.issue.fields.summary,
 				__type: newType,
+				__priority: $scope.issue.fields.priority.name,
 				__statusText: 'Saved as',
 				__key: '',
 				__saved: false
@@ -248,6 +249,11 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 	$scope.changeTaskType = function (type) {
 		this.subtask.fields.__type = type;
 	};
+
+	$scope.changeTaskPriority = function (priority) {
+		this.subtask.fields.__priority = priority;
+	};
+
 	$scope.reqs = $scope.max = 0;
 	$scope.resps = $scope.dynamic = 0;
 	$scope.save = function () {
@@ -260,9 +266,19 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 			$('#throbber').show();
 			for (var i in $scope.subtasks) {
 				var sub = $scope.subtasks[i];
+				var priorityVals = {
+					'Blocker': '1',
+					'Critical': '2',
+					'Major': '3',
+					'Minor': '4',
+					'Trivial': '5'
+				};
 				var newSub = {
 					fields: {
 						summary: sub.fields.__type + ' ' + sub.fields.summary,
+						priority: {
+							id: priorityVals[sub.fields.__priority]
+						},
 						description: sub.fields.description,
 						project: {
 							key: main.fields.project.key
