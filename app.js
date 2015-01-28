@@ -529,13 +529,14 @@ function fixWikiPage (tests) {
 	document.body.style.backgroundColor = 'white';
 	document.body.parentNode.style.backgroundColor = 'white';
 
-	$('tbody tr').each(function (n, el) {
+	$('tbody tr').find('td:first').each(function (n, el) {
 		var status = tests[n] || '';
+		var tr = $(el).parent();
 		if (status == 'Passed') {
-			el.style.backgroundColor = 'rgb(223, 240, 216)';
+			tr.css('backgroundColor', 'rgb(223, 240, 216)');
 		}
 		else if (status == 'Failed') {
-			el.style.backgroundColor = 'rgb(242, 222, 222)';
+			tr.css('backgroundColor', 'rgb(242, 222, 222)');
 		}
 	});
 }
