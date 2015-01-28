@@ -494,7 +494,7 @@ app.get('/getwikipagescreenshot', function (req, res) {
 								}
 								page.evaluate(fixWikiPage, function () {
 									page.renderBase64('PNG', function (img) {
-										res.end('<a href="data:image/png;base64,' + img + '">' + specifiedVersionId + '</a>');
+										res.end('<img src="data:image/png;base64,' + img + '">');
 										ph.exit();
 									});
 								}, tests);
