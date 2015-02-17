@@ -286,9 +286,6 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 						issuetype: {
 							id: 56 // test task
 						},
-						customfield_13245: main.fields.customfield_13245 || [
-							{id: '17706'}
-						], // brick || other
 						parent: {
 							key: main.key
 						},
