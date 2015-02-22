@@ -1,4 +1,4 @@
-var app = angular.module ('app', ['ngRoute', 'ngAnimate', 'ngCookies', 'ui.bootstrap']).config(function($routeProvider) {
+var app = angular.module ('app', ['ngRoute']).config(function($routeProvider) {
 	$routeProvider.when('/', {
 		templateUrl: 'templates/home.html',
 		controller: 'HomeController'
@@ -21,12 +21,11 @@ var app = angular.module ('app', ['ngRoute', 'ngAnimate', 'ngCookies', 'ui.boots
 
 });
 
-app.controller ('appCtrl', function ($scope, $location, $cookies, $http) {
+app.controller ('appCtrl', function ($scope, $location, $http) {
 	$scope.isAuthorized = true;
 	$http({method: 'GET', url: '/isAuthorized'}).success(function() {
 		$scope.isAuthorized = true;
 	}).error(function() {
-		//event.preventDefault();
 		$scope.isAuthorized = false;
 		$location.path('/login');
 	});
@@ -94,7 +93,6 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 			tmp.push('*' + arr[i] + '*:');
 			tmp.push('*' + arr[i] + '*');
 			tmp.push(arr[i] + ':');
-			//tmp.push(arr[i]);
 		}
 		for (i in tmp) {
 			res.push('\n' + tmp[i] + '\n');
@@ -178,7 +176,6 @@ app.controller ('LoginController', function ($scope, $http, $location) {
 });
 
 app.controller ('IssueController', function ($scope, $http, $location, $routeParams) {
-	//$location.path('/login');
 	$scope.issue = {};
 	$scope.subtasks = [];
 
@@ -301,19 +298,14 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 				};
 
 				$http({method: 'POST', url: '/rest/api/latest/subtask/', data: {issue: newSub}}).success(function () {
-					//var res = arguments[0];
-					//alert(JSON.stringify(res));
 					$scope.resps++;
 					$scope.dynamic++;
-					//sub.fields.__key = res.key;
-					//sub.fields.__saved = true;
 					if ($scope.reqs == $scope.resps) {
 						$('#throbber').hide();
 						$('#overlap').hide();
 					}
 					console.log(Math.round($scope.resps * (100 / $scope.reqs)) + '%');
 				}).error(function (err) {
-					//alert(JSON.stringify(err));
 					console.log(err);
 					$scope.resps++;
 					$scope.dynamic++;
@@ -337,9 +329,6 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 		$scope.addSubtask(true);
 		$('#overlap').hide();
 		$('#throbber').hide();
-		/*$( ".container" ).animate({
-			opacity: 1
-		}, 300);*/
 	}).error(function() {
 		$('#overlap').hide();
 		$('#throbber').hide();
