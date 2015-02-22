@@ -18,6 +18,7 @@
 	"jira": "git://github.com/msdjl/node-jira#patch-1",
     "phantom": "*",
     "mongoose": "*",
-    "connect-mongo": "*"
+    "connect-mongo": "*",
+	"compression": "*"
   }
 }
