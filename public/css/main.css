@@ -80,8 +80,9 @@ textarea {
     position: fixed;
     left: 50%;
     top: 50%;
-    width: 100px;
-    height: 100px;
-    margin: 0 -50px 0 -50px;
+    width: 128px;
+    height: 128px;
+    margin-left: -64px;
+	margin-top: -64px;
     z-index: 1000;
 }
