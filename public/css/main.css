@@ -1,12 +1,5 @@
 body {
 	padding: 60px 0px 20px 0px;
-	background-color: rgb(254, 254, 254);
-}
-#bckgrimg {
-    display: block;
-	position: fixed;
-	right: 0px;
-	bottom: -30px;
 }
 textarea {
 	max-width: 100%;
