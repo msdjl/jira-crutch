@@ -33,9 +33,13 @@
 			</ul>
 			<form class="navbar-form navbar-right" role="search" ng-controller="HomeController">
 				<div class="form-group">
-					<input type="text" class="form-control" placeholder="Search issue" ng-model="issue">
+					<div class="input-group">
+						<input type="text" class="form-control" placeholder="Search issue" ng-model="issue">
+						<span class="input-group-btn">
+							<button type="submit" class="btn btn-default" ng-click="openIssue()"><span class="glyphicon glyphicon-search"></span></button>
+						</span>
+					</div>
 				</div>
-				<button type="submit" class="btn btn-default" ng-click="openIssue()"><span class="glyphicon glyphicon-search"></span></button>
 			</form>
 		</div>
 	</div>
