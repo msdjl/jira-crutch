@@ -19,6 +19,12 @@
     "phantom": "*",
     "mongoose": "*",
     "connect-mongo": "*",
-	"compression": "*"
+	"compression": "*",
+	"gulp": "*",
+	"gulp-uglify": "*",
+	"gulp-uglifycss": "*",
+	"gulp-minify-html": "*",
+	"gulp-imagemin": "*",
+	"imagemin-pngquant": "*"
   }
 }

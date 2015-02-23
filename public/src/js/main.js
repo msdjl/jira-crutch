@@ -1,4 +1,4 @@
-var app = angular.module ('app', ['ngRoute']).config(function($routeProvider) {
+var app = angular.module ('app', ['ngRoute']).config(['$routeProvider', function($routeProvider) {
 	$routeProvider.when('/', {
 		templateUrl: 'templates/home.html',
 		controller: 'HomeController'
@@ -19,9 +19,9 @@ var app = angular.module ('app', ['ngRoute']).config(function($routeProvider) {
 		redirectTo: '/'
 	});
 
-});
+}]);
 
-app.controller ('appCtrl', function ($scope, $location, $http) {
+app.controller ('appCtrl', ['$scope', '$location', '$http', function ($scope, $location, $http) {
 	$scope.isAuthorized = true;
 	$http({method: 'GET', url: '/isAuthorized'}).success(function() {
 		$scope.isAuthorized = true;
@@ -39,7 +39,7 @@ app.controller ('appCtrl', function ($scope, $location, $http) {
 		}
 	});
 
-});
+}]);
 
 app.factory ('AuthService', function () {
 	var isAuthenticated = false;
@@ -56,7 +56,7 @@ app.factory ('AuthService', function () {
 	}
 });
 
-app.controller ('ChecklistMakerController', function ($scope, $http) {
+app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope, $http) {
 	$scope.query = '';
 	$scope.resFilter = {
 		include: '',
@@ -135,9 +135,9 @@ app.controller ('ChecklistMakerController', function ($scope, $http) {
 		res = text.substring(er_pos.start != -1 ? er_pos.end : undefined);
 		return res;
 	};
-});
+}]);
 
-app.controller ('HomeController', function ($scope, $http, $location) {
+app.controller ('HomeController', ['$scope', '$http', '$location', function ($scope, $http, $location) {
 	$scope.issue = '';
 	$scope.openIssue = function () {
 		$location.path('/issue/' + $scope.issue);
@@ -151,9 +151,9 @@ app.controller ('HomeController', function ($scope, $http, $location) {
 			console.log(arguments);
 		});
 	};
-});
+}]);
 
-app.controller ('LoginController', function ($scope, $http, $location) {
+app.controller ('LoginController', ['$scope', '$http', '$location', function ($scope, $http, $location) {
 	$scope.login = function () {
 		$('#overlap').show();
 		$('#throbber').show();
@@ -173,9 +173,9 @@ app.controller ('LoginController', function ($scope, $http, $location) {
 			console.log(arguments);
 		});
 	};
-});
+}]);
 
-app.controller ('IssueController', function ($scope, $http, $location, $routeParams) {
+app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParams', function ($scope, $http, $location, $routeParams) {
 	$scope.issue = {};
 	$scope.subtasks = [];
 
@@ -336,4 +336,4 @@ app.controller ('IssueController', function ($scope, $http, $location, $routePar
 		alert('error');
 		$location.path('/');
 	});
-});
+}]);
