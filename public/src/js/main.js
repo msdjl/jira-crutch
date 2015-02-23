@@ -37,6 +37,10 @@ app.controller ('appCtrl', ['$scope', '$location', '$http', function ($scope, $l
 				$location.path('/login');
 			}
 		}
+		var expander = $('#expander');
+		if (!expander.hasClass('collapsed')) {
+			expander.click();
+		}
 	});
 
 }]);

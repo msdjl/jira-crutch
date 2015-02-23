@@ -1,56 +1,68 @@
 <div class="container">
 	<div class="row">
-		<div class="form-group">
-			<label>JQL query</label>
-			<textarea class="form-control" rows="3" ng-model="query"></textarea>
-		</div>
-		<div class="form-group">
-			<label>Quick filter</label>
-			<input class="form-control" type="text" ng-model="resFilter.include">
+		<div class="col-xs-12">
+			<div class="form-group">
+				<label>JQL query</label>
+				<textarea class="form-control" rows="3" ng-model="query"></textarea>
+			</div>
+			<div class="form-group">
+				<label>Quick filter</label>
+				<input class="form-control" type="text" ng-model="resFilter.include">
+			</div>
 		</div>
 	</div>
 
 	<div class="row">
-		<button class="btn btn-primary col-xs-2" ng-click="findIssues()">Draw a table</button>
-		<div class="col-xs-8">
+		<div class="col-xs-12">
+			<button class="btn btn-primary col-xs-5 col-md-3" ng-click="findIssues()">Draw a table</button>
+			<button class="btn btn-default col-xs-5 col-xs-offset-2 col-md-3 col-md-offset-6" ng-click="toggleShowSettings()">Settings</button>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12">
+			<br>
 			<p class="text-success" ng-if="jout.total">Shown {{jout.issues.length}} of {{jout.total}} issues</p>
 		</div>
-		<button class="btn btn-default col-xs-2" ng-click="toggleShowSettings()">Settings</button>
 	</div>
 
 	<div class="row">
-		<div class="form-group" ng-show="showSettings">
+		<div class="col-xs-12">
+			<div class="form-group" ng-show="showSettings">
+				<br>
+				<label>Delimiters for steps</label>
+				<textarea class="form-control" rows="5" ng-model="steps_Delimiters"></textarea> <br>
+
+				<label>Delimiters for expected results</label>
+				<textarea class="form-control" rows="5" ng-model="er_Delimiters"></textarea> <br>
+
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" ng-model="hideNumbers"> Hide numbers
+					</label>
+				</div>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" ng-model="hidePreconditions"> Hide preconditions column
+					</label>
+				</div>
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" ng-model="hideSummary"> Hide summary column
+					</label>
+				</div>
+			</div>
 			<br>
-			<label>Delimiters for steps</label>
-			<textarea class="form-control" rows="5" ng-model="steps_Delimiters"></textarea> <br>
-
-			<label>Delimiters for expected results</label>
-			<textarea class="form-control" rows="5" ng-model="er_Delimiters"></textarea> <br>
-
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" ng-model="hideNumbers"> Hide numbers
-				</label>
-			</div>
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" ng-model="hidePreconditions"> Hide preconditions column
-				</label>
-			</div>
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" ng-model="hideSummary"> Hide summary column
-				</label>
-			</div>
 		</div>
-		<br>
 	</div>
 	<div class="row">
-		<span ng-if="jout.issues">
+		<div class="col-xs-12">
+			<span ng-if="jout.issues">
 			<b>List of issues' keys presented in table. You can use it for bulk linking to main Test Case</b>
 		</span>
-		<br>
-		<span ng-repeat="issue in jout.issues | filter:resFilter.include">{{issue.key}} </span>
+			<br>
+			<span ng-repeat="issue in jout.issues | filter:resFilter.include">{{issue.key}} </span>
+		</div>
 	</div>
 	<div class="row">
 		<table border="1" width="100%" ng-if="jout.issues">
