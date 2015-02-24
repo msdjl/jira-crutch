@@ -108,6 +108,7 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 	};
 	$scope.getDelimiterPosition = function (text, dels_arr, from) {
 		var i, pos, dels = $scope.extendDelimiters(dels_arr.split('\n'));
+		text = text || "";
 		for (i in dels) {
 			pos = text.toLowerCase().indexOf(dels[i].toLowerCase(), from);
 			if (pos != -1) {
@@ -120,12 +121,14 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 		};
 	};
 	$scope.getPreconditions = function (text) {
+		text = text || "";
 		var res,
 			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters);
 		res = text.substring(0, st_pos.start != -1 ? st_pos.start : undefined);
 		return res;
 	};
 	$scope.getSteps = function (text) {
+		text = text || "";
 		var res,
 			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters),
 			er_pos = $scope.getDelimiterPosition(text, $scope.er_Delimiters, st_pos.start != -1 ? st_pos.end : undefined);
@@ -133,6 +136,7 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 		return res;
 	};
 	$scope.getERs = function (text) {
+		text = text || "";
 		var res,
 			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters),
 			er_pos = $scope.getDelimiterPosition(text, $scope.er_Delimiters, st_pos.start != -1 ? st_pos.end : undefined);
