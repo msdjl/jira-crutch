@@ -7,6 +7,7 @@ var compress = require('compression');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var https = require('https');
+var request = require('request').defaults({ jar: false });
 var app = express();
 var phantom = require('phantom');
 var mongoose = require('mongoose');
@@ -237,6 +238,9 @@ app.post('/generatereport', function (req, res) {
 		return true;
 	}
 	var issueKey = req.body.issueKey;
+	var pageVersion = req.body.pageVersion;
+	var pageId = req.body.pageId;
+
 	if (!issueKey) {
 		res.status(400).end('missing parameters');
 		return;
@@ -283,6 +287,18 @@ app.post('/testcomment', function (req, res) {
 			res.status(400).json(error);
 			return true;
 		}
+		wikiScreenshot(pageId, pageVersion, issueKey, c, function (err, img) {
+			if (err) {
+				//res.status(500).end(err);
+				console.log('wikiScreenshot', err);
+				return;
+			}
+			attachScreenshot (pageId, pageVersion, issueKey, c, img, function (err) {
+				if (err) {
+					console.log('attachScreenshot', err);
+				}
+			});
+		});
 		res.json({issueKey: issueKey, comment: comment});
 	});
 });
@@ -323,23 +339,6 @@ app.post('/testchangestatus', function (req, res) {
 		}
 		res.json({issueKey: issueKey});
 	});
-});
-
-app.post('/testattachment', function (req, res) {
-	/*var newStatusId;
-	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
-	var issueKey = req.body.issueKey;
-	var request = require('request');
-	var formData = {
-		file: file
-	};
-	request.post({url: 'https://jira.returnonintelligence.com/rest/api/2/issue/CTT-39084/attachments', formData: formData}, function () {
-		res.json(arguments[1]);
-	});*/
 });
 
 app.get('/gettests', function (req, res) {
@@ -457,15 +456,51 @@ app.get('/getwikipagescreenshot', function (req, res) {
 	var pageId = req.query.pageId;
 	var pageVersion = req.query.pageVersion;
 	var issueKey = req.query.issueKey;
+
 	if (!pageId || !pageVersion || !issueKey) {
 		res.status(400).end('missing parameters');
 		return;
 	}
+
+	wikiScreenshot(pageId, pageVersion, issueKey, c, function (err, img) {
+		if (err) {
+			res.end(err);
+			return;
+		}
+		res.end('<html><body><img src="data:image/png;base64,' + img + '"></body></html>');
+	});
+});
+
+function attachScreenshot (pageId, pageVersion, issueKey, credentials, img, cb) {
+	var c = credentials;
+	var b = new Buffer(img, 'base64');
+	var formData = {
+		file: {
+			value: b,
+			options: {
+				filename: issueKey + '_' + pageId + '_' + pageVersion + '.png',
+				contentType: 'image/png'
+			}
+		}
+	};
+	request.post({
+		url: 'https://' + c.username + ':' + c.password + '@jira.returnonintelligence.com/rest/api/2/issue/' + issueKey + '/attachments',
+		formData: formData,
+		headers: {
+			'X-Atlassian-Token': 'nocheck'
+		}
+	}, function (error, response, body) {
+		cb(error);
+	});
+}
+
+function wikiScreenshot (pageId, pageVersion, issueKey, credentials, cb) {
 	var baseUrl = 'https://wiki.returnonintelligence.com/';
 	var loginPage = 'dologin.action';
 	var viewPage = 'pages/viewpage.action';
 	var historyPage = 'pages/viewpreviousversions.action';
 	var query = '?pageId=';
+	var c = credentials;
 	var loginSettings = {
 		os_username: c.username,
 		os_password: c.password,
@@ -485,33 +520,35 @@ app.get('/getwikipagescreenshot', function (req, res) {
 					page.open(baseUrl + viewPage + query + specifiedVersionId, function () {
 						var tests = {};
 						Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey})
-						.populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
-							if (err) {
-								res.status(500).end(err);
-								return;
-							}
-							if (doc) {
-								for (var i in doc.tests) {
-									tests[doc.tests[i].testId] = doc.tests[i].testStatus;
+							.populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
+								if (err) {
+									//res.status(500).end(err);
+									return cb(err);
 								}
-								page.evaluate(fixWikiPage, function () {
-									page.renderBase64('PNG', function (img) {
-										res.end('<html><body><img src="data:image/png;base64,' + img + '"></body></html>');
-										ph.exit();
-									});
-								}, tests);
-							}
-							else {
-								res.end(':(');
-								ph.exit();
-							}
-						});
+								if (doc) {
+									for (var i in doc.tests) {
+										tests[doc.tests[i].testId] = doc.tests[i].testStatus;
+									}
+									page.evaluate(fixWikiPage, function () {
+										page.renderBase64('PNG', function (img) {
+											//res.end('<html><body><img src="data:image/png;base64,' + img + '"></body></html>');
+											cb(null, img);
+											ph.exit();
+										});
+									}, tests);
+								}
+								else {
+									//res.end(':(');
+									cb(':(');
+									ph.exit();
+								}
+							});
 					});
 				}, pageVersion);
 			});
 		});
 	});
-});
+}
 
 function fixWikiPage (tests) {
 	var content = document.getElementById('main').innerHTML;
