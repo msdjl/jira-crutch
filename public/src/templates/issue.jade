@@ -1,0 +1,11 @@
+.container
+	include issue_main
+	include issue_sub
+	button.btn.btn-primary.col-xs-5.col-md-3(ng-click='addSubtask()')
+		span.glyphicon.glyphicon-plus
+		span &nbsp;Add another
+	button.btn.btn-primary.col-xs-5.col-xs-offset-2.col-md-3.col-md-offset-6(ng-click='save()')
+		span.glyphicon.glyphicon-floppy-save
+		span &nbsp;Save
+	progressbar#progress.progress-striped.active(max='reqs', value='resps', type='danger')
+		i {{resps}} / {{reqs}}

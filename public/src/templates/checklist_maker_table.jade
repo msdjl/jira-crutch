@@ -1,0 +1,32 @@
+table(border='1', width='100%', ng-if='jout.issues')
+	thead
+		td
+			b #
+		td(ng-if='!hideSummary')
+			b Summary
+		td(ng-if='!hidePreconditions')
+			b Preconditions
+		td
+			b Steps
+		td
+			b Exprected result
+		td
+			b Comment/Post-condition
+		td
+			b Issue key
+	tbody
+		tr(ng-repeat='issue in jout.issues | filter:resFilter.include')
+			td
+				div(ng-if='!hideNumbers') {{$index + 1}}
+			td(ng-if='!hideSummary')
+				p {{issue.fields.summary}}
+			td(ng-if='!hidePreconditions')
+				div(ng-repeat='pr_line in getPreconditions(issue.fields.description).split("\n") track by $index') {{pr_line}}
+			td
+				div(ng-repeat='st_line in getSteps(issue.fields.description).split("\n") track by $index') {{st_line}}
+			td
+				div(ng-repeat='er_line in getERs(issue.fields.description).split("\n") track by $index') {{er_line}}
+			td
+				div(ng-if='issue.fields.customfield_13342.value == "Yes"') Cross-browser
+			td
+				p {{issue.key}}

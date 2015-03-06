@@ -26,6 +26,7 @@
 	"gulp-uglifycss": "*",
 	"gulp-minify-html": "*",
 	"gulp-imagemin": "*",
+	"gulp-jade": "*",
 	"imagemin-pngquant": "*"
   }
 }

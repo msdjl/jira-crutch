@@ -4,6 +4,7 @@ var uglifycss = require('gulp-uglifycss');
 var minifyHTML = require('gulp-minify-html');
 var imagemin = require('gulp-imagemin');
 var pngquant = require('imagemin-pngquant');
+var jade = require('gulp-jade');
 
 gulp.task('js', function () {
 	gulp.src('public/src/js/*.js')
@@ -15,6 +16,12 @@ gulp.task('css', function () {
 	gulp.src('public/src/css/*.css')
 		.pipe(uglifycss())
 		.pipe(gulp.dest('public/css'));
+});
+
+gulp.task('jade', function () {
+	gulp.src('public/src/**/*.jade')
+		.pipe(jade({pretty: false}))
+		.pipe(gulp.dest('public'));
 });
 
 gulp.task('html', function () {
@@ -33,4 +40,4 @@ gulp.task('img', function () {
 		.pipe(gulp.dest('public/img'));
 });
 
-gulp.task('default', ['js', 'css', 'html', 'img']);
+gulp.task('default', ['js', 'css', 'jade', 'img']);

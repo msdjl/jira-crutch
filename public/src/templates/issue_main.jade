@@ -1,0 +1,15 @@
+.well
+	.row
+		h4 {{issue.fields.issuetype.name}} {{issue.key}}
+	.row
+		.form-group
+			label Summary
+			input.form-control(ng-model='issue.fields.summary')
+	.row
+		.form-group
+			label Description
+			textarea.form-control.description(rows='10', ng-model='issue.fields.description')
+	.row
+		label Subtasks
+		ul.list-group
+			li.list-group-item(class='list-group-item-{{getSubtaskStyle(subtask)}}', ng-repeat='subtask in issue.fields.subtasks | filter:subtasksfilter') {{ subtask.fields.summary }}

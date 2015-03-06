@@ -1,0 +1,44 @@
+.well.subtask(id='subtask{{$index}}', ng-repeat='subtask in subtasks')
+	button.btn.btn-danger.deleteButton(ng-click='removeSubtask()')
+		span.glyphicon.glyphicon-remove
+	.row
+		h4 New Subtask {{subtask.fields.__saved ? '. ' + subtask.fields.__statusText + ' ' + subtask.fields.__key : ''}}
+	.row
+		.form-group
+			label Summary
+			.input-group
+				.input-group-btn
+					button.btn.btn-default.dropdown-toggle(data-toggle='dropdown') {{subtask.fields.__type}}
+						span.caret
+					ul.dropdown-menu.dropdown-menu-left(role='menu')
+						li
+							a(href='#', ng-click='changeTaskType("[tc] ")', onclick='return false;') [tc]
+						li
+							a(href='#', ng-click='changeTaskType("[test] ")', onclick='return false;') [test]
+						li
+							a(href='#', ng-click='changeTaskType("[req] ")', onclick='return false;') [req]
+						li
+							a(href='#', ng-click='changeTaskType("[auto] ")', onclick='return false;') [auto]
+				input.form-control(ng-model='subtask.fields.summary')
+				.input-group-btn
+					button.btn.btn-default.dropdown-toggle(data-toggle='dropdown') {{subtask.fields.__priority}}&nbsp;
+						span.caret
+					ul.dropdown-menu.dropdown-menu-right(role='menu')
+						li
+							a(href='#', ng-click='changeTaskPriority("Blocker")', onclick='return false;') Blocker
+						li
+							a(href='#', ng-click='changeTaskPriority("Critical")', onclick='return false;') Critical
+						li
+							a(href='#', ng-click='changeTaskPriority("Major")', onclick='return false;') Major
+						li
+							a(href='#', ng-click='changeTaskPriority("Minor")', onclick='return false;') Minor
+						li
+							a(href='#', ng-click='changeTaskPriority("Trivial")', onclick='return false;') Trivial
+	.row
+		.form-group
+			label Description
+			textarea.form-control.description(rows='5', ng-model='subtask.fields.description')
+	.row
+		.form-group
+			label Estimate
+			input.form-control.col-xs-2(ng-model='subtask.fields.originalEstimate')

@@ -1,0 +1,17 @@
+doctype html
+html(ng-app='app')
+	head
+		meta(name='viewport', content='width=device-width, initial-scale=1')
+		link(rel='stylesheet', href='/bower/bootstrap/dist/css/bootstrap.min.css')
+		link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
+		link(rel='stylesheet', href='/css/main.css')
+		script(src='/bower/jquery/dist/jquery.min.js')
+		script(src='/bower/bootstrap/dist/js/bootstrap.min.js')
+		script(src='/bower/angular/angular.min.js')
+		script(src='/bower/angular-route/angular-route.min.js')
+		script(src='/js/main.js')
+	body(ng-controller='appCtrl')
+		include navbartop
+		ng-view
+		#overlap
+		img#throbber(src='/img/throbber.gif')

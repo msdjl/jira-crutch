@@ -1,0 +1,48 @@
+.container
+	.row
+		.col-xs-12
+			.form-group
+				label JQL query
+				textarea.form-control(rows='3', ng-model='query')
+			.form-group
+				label Quick filter
+				input.form-control(ng-model='resFilter.include')
+	.row
+		.col-xs-12
+			button.btn.btn-primary.col-xs-5.col-md-3(ng-click='findIssues()') Draw a table
+			button.btn.btn-default.col-xs-5.col-xs-offset-2.col-md-3.col-md-offset-6(ng-click='toggleShowSettings()') Settings
+	.row
+		.col-xs-12
+			br
+			p.text-success(ng-if='jout.total') Shown {{jout.issues.length}} of {{jout.total}} issues
+	.row
+		.col-xs-12
+			.form-group(ng-show='showSettings')
+				br
+				label Delimiters for steps
+				textarea.form-control(rows='5', ng-model='steps_Delimiters')
+				br
+				label Delimiters for expected results
+				textarea.form-control(rows='5', ng-model='er_Delimiters')
+				br
+				.checkbox
+					label
+						input(type='checkbox', ng-model='hideNumbers')
+						span Hide numbers
+				.checkbox
+					label
+						input(type='checkbox', ng-model='hidePreconditions')
+						span Hide preconditions column
+				.checkbox
+					label
+						input(type='checkbox', ng-model='hideSummary')
+						span Hide summary column
+			br
+	.row
+		.col-xs-12
+			span(ng-if='jout.issues')
+				b List of issues' keys presented in table. You can use it for bulk linking to main Test Case
+			br
+			span(ng-repeat='issue in jout.issues | filter:resFilter.include') {{issue.key}}&nbsp;
+	.row
+		include checklist_maker_table
