@@ -7,16 +7,13 @@ var compress = require('compression');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var https = require('https');
-var request = require('request').defaults({ jar: false });
+var request = require('request');
 var app = express();
 var phantom = require('phantom');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test', { keepAlive: 1 });
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function (callback) {
-	// yay!
-});
 
 var testSchema = mongoose.Schema({
 	testId: String,
@@ -40,7 +37,6 @@ var contextSchema = mongoose.Schema({
 
 var Test = mongoose.model('Test', testSchema);
 var Context = mongoose.model('Context', contextSchema);
-
 
 var MongoStore = require('connect-mongo')(session);
 app.use(session({
@@ -71,7 +67,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(function(req, res, next) {
 	res.header("Access-Control-Allow-Origin", req.headers.origin);
 	res.header("Access-Control-Allow-Credentials", "true");
-	//res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	res.header('Access-Control-Allow-Headers', 'Origin, Accept, Content-Type, Authorization, Content-Length, X-Requested-With');
 	if ('OPTIONS' == req.method) {
@@ -144,27 +139,14 @@ app.post('/login', function (req, res) {
 
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
 
-/*	jira.getCurrentUser(function (error, user) {
+	jira.getCurrentUser(function (error, user) {
 		if (error) {
 			console.log(error);
 			res.status(401).end(error);
 			return true;
 		}
 		c.isAuthorized = true;
-		c.displayName = (user && user.displayName) ? user.displayName : 'error';
-		res.cookie('displayName', c.displayName);
-		res.cookie('isAuthorized', true);
-		res.end('ok');
-	});*/
-
-	jira.searchUsers(c.username, undefined, undefined, undefined, undefined, function(error, users) {
-		if (error) {
-			console.log(error);
-			res.status(401).end('Unauthorized!');
-			return true;
-		}
-		c.isAuthorized = true;
-		c.displayName = (users[0] && users[0].displayName) ? users[0].displayName : 'error';
+		c.displayName = user.name;
 		res.cookie('displayName', c.displayName);
 		res.cookie('isAuthorized', true);
 		res.end('ok');
@@ -228,42 +210,6 @@ app.post('/rest/api/latest/subtask', function (req, res) {
 			}
 			res.json(issue);
 		});
-	});
-});
-
-app.post('/generatereport', function (req, res) {
-	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
-	var issueKey = req.body.issueKey;
-	var pageVersion = req.body.pageVersion;
-	var pageId = req.body.pageId;
-
-	if (!issueKey) {
-		res.status(400).end('missing parameters');
-		return;
-	}
-	Context.findOne({issueKey: issueKey}).populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
-		if (err) {
-			res.status(500).end(err);
-			return;
-		}
-		if (doc) {
-			var comment = 'test comment\n123 ;)';
-			var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-			jira.addComment(doc.issueKey, comment, function(error) {
-				if (error) {
-					res.status(400).json(error);
-					return true;
-				}
-				res.json({issueKey: doc.issueKey, comment: comment});
-			});
-		}
-		else {
-			res.status(400).end('context not found');
-		}
 	});
 });
 
@@ -444,30 +390,6 @@ app.post('/savetest', function (req, res) {
 				});
 			});
 		}
-	});
-});
-
-app.get('/getwikipagescreenshot', function (req, res) {
-	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
-	var pageId = req.query.pageId;
-	var pageVersion = req.query.pageVersion;
-	var issueKey = req.query.issueKey;
-
-	if (!pageId || !pageVersion || !issueKey) {
-		res.status(400).end('missing parameters');
-		return;
-	}
-
-	wikiScreenshot(pageId, pageVersion, issueKey, c, function (err, img) {
-		if (err) {
-			res.end(err);
-			return;
-		}
-		res.end('<html><body><img src="data:image/png;base64,' + img + '"></body></html>');
 	});
 });
 
