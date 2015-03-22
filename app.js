@@ -64,7 +64,7 @@ app.use(cookieParser());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
 	res.header("Access-Control-Allow-Origin", req.headers.origin);
 	res.header("Access-Control-Allow-Credentials", "true");
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
@@ -77,39 +77,34 @@ app.use(function(req, res, next) {
 	}
 });
 
-app.get('/', function (req, res) {
-	if (!req.session.credentials || !req.session.credentials.isAuthorized) {
-		req.session.destroy();
-		res.clearCookie('isAuthorized');
-		res.clearCookie('displayName');
+app.use(function (req, res, next) {
+	if (req.url == '/login' || req.url == '/login/' || req.url == '/logout' || req.url == '/logout/') {
+		next();
 	}
-	res.sendFile(__dirname + '/public/index.html');
+	else {
+		var c = req.session.credentials;
+		if (!c || !c.isAuthorized) {
+			res.status(401).end('Unauthorized!');
+			return true;
+		}
+		else {
+			next();
+		}
+	}
 });
 
 app.get('/isAuthorized', function (req, res) {
 	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-	}
-	else {
-		res.json({
-			isAuthorized: true,
-			name: c.displayName
-		});
-	}
+	res.json({
+		isAuthorized: true,
+		name: c.displayName
+	});
 });
 
 app.get('/rest/api/latest/search', function (req, res) {
 	var jql = req.query.jql;
-
 	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
-
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-
 	jira.searchJira(jql, { maxResults: 1000, fields: ['summary', 'description', 'customfield_13342'] }, function(error, result) {
 		if (error) {
 			res.status(400).end(error);
@@ -138,7 +133,6 @@ app.post('/login', function (req, res) {
 	};
 
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-
 	jira.getCurrentUser(function (error, user) {
 		if (error) {
 			console.log(error);
@@ -161,15 +155,8 @@ app.post('/logout', function (req, res) {
 });
 
 app.get('/rest/api/latest/issue/:id', function (req, res) {
-
 	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
-
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-
 	jira.findIssue(req.params.id, function(error, issue) {
 		if (error) {
 			res.status(400).end(error);
@@ -180,20 +167,13 @@ app.get('/rest/api/latest/issue/:id', function (req, res) {
 });
 
 app.post('/rest/api/latest/subtask', function (req, res) {
-
 	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
-
 	var s = req.body.issue;
 	if (!s) {
-		// bad request
+		res.status(400).end('missing parameter');
+		return true;
 	}
-
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-
 	jira.addNewIssue(s, function(error, issue) {
 		if (error) {
 			res.status(400).json(error);
@@ -215,10 +195,6 @@ app.post('/rest/api/latest/subtask', function (req, res) {
 
 app.post('/testcomment', function (req, res) {
 	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
 	var pageId = req.body.pageId;
 	var pageVersion = req.body.pageVersion;
 	var issueKey = req.body.issueKey;
@@ -252,10 +228,6 @@ app.post('/testcomment', function (req, res) {
 app.post('/testchangestatus', function (req, res) {
 	var newStatusId;
 	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
 	var issueKey = req.body.issueKey;
 	var status = req.body.status;
 	if (!issueKey || !status) {
@@ -289,10 +261,6 @@ app.post('/testchangestatus', function (req, res) {
 
 app.get('/gettests', function (req, res) {
 	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
 	var pageId = req.query.pageId;
 	var pageVersion = req.query.pageVersion;
 	var issueKey = req.query.issueKey;
@@ -317,10 +285,6 @@ app.get('/gettests', function (req, res) {
 
 app.post('/savetest', function (req, res) {
 	var c = req.session.credentials;
-	if (!c || !c.isAuthorized) {
-		res.status(401).end('Unauthorized!');
-		return true;
-	}
 	var test;
 	var pageId = req.body.pageId;
 	var pageVersion = req.body.pageVersion;
@@ -473,8 +437,7 @@ function wikiScreenshot (pageId, pageVersion, issueKey, credentials, cb) {
 }
 
 function fixWikiPage (tests) {
-	var content = document.getElementById('main').innerHTML;
-	document.body.innerHTML = content;
+	document.body.innerHTML = document.getElementById('main').innerHTML;
 	$('#comments-section').remove();
 	$('#likes-and-labels-container').remove();
 	$('#navigation').remove();
