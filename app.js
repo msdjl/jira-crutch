@@ -1,7 +1,6 @@
 var express = require('express');
 var session = require('express-session');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var compress = require('compression');
 var cookieParser = require('cookie-parser');
@@ -53,8 +52,6 @@ app.set('demo', process.env.DEMO == 'true' ? 'demo' : '');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(compress());
 app.use(bodyParser.json());
@@ -211,7 +208,6 @@ app.post('/testcomment', function (req, res) {
 		}
 		wikiScreenshot(pageId, pageVersion, issueKey, c, function (err, img) {
 			if (err) {
-				//res.status(500).end(err);
 				console.log('wikiScreenshot', err);
 				return;
 			}
@@ -408,7 +404,6 @@ function wikiScreenshot (pageId, pageVersion, issueKey, credentials, cb) {
 						Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey})
 							.populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
 								if (err) {
-									//res.status(500).end(err);
 									return cb(err);
 								}
 								if (doc) {
@@ -417,14 +412,12 @@ function wikiScreenshot (pageId, pageVersion, issueKey, credentials, cb) {
 									}
 									page.evaluate(fixWikiPage, function () {
 										page.renderBase64('PNG', function (img) {
-											//res.end('<html><body><img src="data:image/png;base64,' + img + '"></body></html>');
 											cb(null, img);
 											ph.exit();
 										});
 									}, tests);
 								}
 								else {
-									//res.end(':(');
 									cb(':(');
 									ph.exit();
 								}
