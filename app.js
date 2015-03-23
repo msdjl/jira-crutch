@@ -75,18 +75,13 @@ app.use(function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
-	if (req.url == '/login' || req.url == '/login/' || req.url == '/logout' || req.url == '/logout/') {
+	var c = req.session.credentials;
+	if (req.url.indexOf('/login') == 0 || req.url.indexOf('/logout') == 0 || (c && c.isAuthorized)) {
 		next();
 	}
 	else {
-		var c = req.session.credentials;
-		if (!c || !c.isAuthorized) {
-			res.status(401).end('Unauthorized!');
-			return true;
-		}
-		else {
-			next();
-		}
+		res.status(401).end('Unauthorized!');
+		return true;
 	}
 });
 
