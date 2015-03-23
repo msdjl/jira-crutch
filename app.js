@@ -9,6 +9,7 @@ var https = require('https');
 var request = require('request');
 var app = express();
 var phantom = require('phantom');
+var JiraApi = require('jira').JiraApi;
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test', { keepAlive: 1 });
 var db = mongoose.connection;
@@ -45,10 +46,6 @@ app.use(session({
 	})
 }));
 
-var JiraApi = require('jira').JiraApi;
-
-app.set('demo', process.env.DEMO == 'true' ? 'demo' : '');
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -57,7 +54,6 @@ app.use(compress());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-//app.use(session({secret:'meow'}));
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -86,10 +82,9 @@ app.use(function (req, res, next) {
 });
 
 app.get('/isAuthorized', function (req, res) {
-	var c = req.session.credentials;
 	res.json({
 		isAuthorized: true,
-		name: c.displayName
+		name: req.session.credentials.displayName
 	});
 });
 
@@ -110,7 +105,7 @@ app.post('/login', function (req, res) {
 	var username = req.body.username || '';
 	var password = req.body.password || '';
 	var protocol = req.body.protocol || 'https';
-	var hostname = req.body.hostname || app.get('demo') + 'jira.returnonintelligence.com';
+	var hostname = req.body.hostname || 'jira.returnonintelligence.com';
 	var port = req.body.port || 443;
 	var apiVersion = req.body.apiVersion || 2;
 
