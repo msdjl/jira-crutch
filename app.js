@@ -419,24 +419,20 @@ function wikiScreenshot (pageId, pageVersion, issueKey, credentials, cb) {
 	});
 }
 
-function fixWikiPage (tests) {
-	document.body.innerHTML = document.getElementById('main').innerHTML;
-	$('#comments-section').remove();
-	$('#likes-and-labels-container').remove();
-	$('#navigation').remove();
-	$('#page-history-warning').remove();
-	document.body.style.overflow = 'visible';
-	var tables = document.getElementsByClassName('table-wrap');
-	for (var i in tables) {
-		if (tables[i].style) {
-			tables[i].style.overflow = 'visible';
-		}
-	}
-	document.body.parentNode.style.padding = '10px';
-	document.body.style.backgroundColor = 'white';
-	document.body.parentNode.style.backgroundColor = 'white';
-
-	$('tbody tr').find('td:first').each(function (n, el) {
+function fixWikiPage (tests, body) {
+	tests = tests || {};
+	body = $(body || window.document.body);
+	body.html(body.find('#main').html());
+	body.find('#comments-section').remove();
+	body.find('#likes-and-labels-container').remove();
+	body.find('#navigation').remove();
+	body.find('#page-history-warning').remove();
+	body.find('.table-wrap').each(function (n, el) {
+		$(el).css('overflow', 'visible');
+	});
+	body.parent().css('padding', '10px').css('backgroundColor', 'white');
+	body.css('overflow', 'visible').css('backgroundColor', 'white');
+	body.find('tbody tr').find('td:first').each(function (n, el) {
 		var status = tests[n] || '';
 		var tr = $(el).parent();
 		if (status == 'Passed') {
