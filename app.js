@@ -423,10 +423,7 @@ function fixWikiPage (tests, body) {
 	tests = tests || {};
 	body = $(body || window.document.body);
 	body.html(body.find('#main').html());
-	body.find('#comments-section').remove();
-	body.find('#likes-and-labels-container').remove();
-	body.find('#navigation').remove();
-	body.find('#page-history-warning').remove();
+	body.find('#comments-section, #likes-and-labels-container, #navigation, #page-history-warning').remove();
 	body.find('.table-wrap').each(function (n, el) {
 		$(el).css('overflow', 'visible');
 	});
