@@ -424,9 +424,7 @@ function fixWikiPage (tests, body) {
 	body = $(body || window.document.body);
 	body.html(body.find('#main').html());
 	body.find('#comments-section, #likes-and-labels-container, #navigation, #page-history-warning').remove();
-	body.find('.table-wrap').each(function (n, el) {
-		$(el).css('overflow', 'visible');
-	});
+	body.find('.table-wrap').css('overflow', 'visible');
 	body.parent().css('padding', '10px').css('backgroundColor', 'white');
 	body.css('overflow', 'visible').css('backgroundColor', 'white');
 	body.find('tbody tr').find('td:first').each(function (n, el) {
