@@ -41,6 +41,8 @@ var Context = mongoose.model('Context', contextSchema);
 var MongoStore = require('connect-mongo')(session);
 app.use(session({
 	secret: 'superSecret',
+	resave: false,
+	saveUninitialized: false,
 	store: new MongoStore({
 		url: 'mongodb://localhost/test'
 	})
