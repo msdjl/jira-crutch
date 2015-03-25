@@ -8,7 +8,6 @@ var bodyParser = require('body-parser');
 var https = require('https');
 var request = require('request');
 var app = express();
-var phantom = require('phantom');
 var JiraApi = require('jira').JiraApi;
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test', { keepAlive: 1 });
@@ -50,8 +49,8 @@ app.use(session({
 
 app.use(logger('dev'));
 app.use(compress());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -184,6 +183,7 @@ app.post('/testcomment', function (req, res) {
 	var pageVersion = req.body.pageVersion;
 	var issueKey = req.body.issueKey;
 	var comment = req.body.comment;
+	var img = req.body.img;
 	if (!pageId || !pageVersion || !issueKey || !comment) {
 		res.status(400).end('missing parameters');
 		return;
@@ -194,16 +194,10 @@ app.post('/testcomment', function (req, res) {
 			res.status(400).json(error);
 			return true;
 		}
-		wikiScreenshot(pageId, pageVersion, issueKey, c, function (err, img) {
+		attachScreenshot (pageId, pageVersion, issueKey, c, img, function (err) {
 			if (err) {
-				console.log('wikiScreenshot', err);
-				return;
+				console.log('attachScreenshot', err);
 			}
-			attachScreenshot (pageId, pageVersion, issueKey, c, img, function (err) {
-				if (err) {
-					console.log('attachScreenshot', err);
-				}
-			});
 		});
 		res.json({issueKey: issueKey, comment: comment});
 	});
@@ -361,79 +355,6 @@ function attachScreenshot (pageId, pageVersion, issueKey, credentials, img, cb) 
 		}
 	}, function (error, response, body) {
 		cb(error);
-	});
-}
-
-function wikiScreenshot (pageId, pageVersion, issueKey, credentials, cb) {
-	var baseUrl = 'https://wiki.returnonintelligence.com/';
-	var loginPage = 'dologin.action';
-	var viewPage = 'pages/viewpage.action';
-	var historyPage = 'pages/viewpreviousversions.action';
-	var query = '?pageId=';
-	var c = credentials;
-	var loginSettings = {
-		os_username: c.username,
-		os_password: c.password,
-		os_destination: baseUrl + historyPage + query + pageId
-	};
-	var loginSettingsStr = '';
-	for (var i in loginSettings) {
-		loginSettingsStr += i + '=' + loginSettings[i] + '&';
-	}
-	phantom.create(function (ph) {
-		ph.createPage(function (page) {
-			page.set('viewportSize', {width: 1500, height: 1000});
-			page.open(baseUrl + loginPage, 'POST', loginSettingsStr, function () {
-				page.evaluate(function (pageVersion) {
-					return $('#rowForVersion' + pageVersion + ' a:first').attr('href').split('=')[1];
-				}, function (specifiedVersionId) {
-					page.open(baseUrl + viewPage + query + specifiedVersionId, function () {
-						var tests = {};
-						Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey})
-							.populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
-								if (err) {
-									return cb(err);
-								}
-								if (doc) {
-									for (var i in doc.tests) {
-										tests[doc.tests[i].testId] = doc.tests[i].testStatus;
-									}
-									page.evaluate(fixWikiPage, function () {
-										page.renderBase64('PNG', function (img) {
-											cb(null, img);
-											ph.exit();
-										});
-									}, tests);
-								}
-								else {
-									cb(':(');
-									ph.exit();
-								}
-							});
-					});
-				}, pageVersion);
-			});
-		});
-	});
-}
-
-function fixWikiPage (tests, body) {
-	tests = tests || {};
-	body = $(body || window.document.body);
-	body.html(body.find('#main').html());
-	body.find('#comments-section, #likes-and-labels-container, #navigation, #page-history-warning').remove();
-	body.find('.table-wrap').css('overflow', 'visible');
-	body.parent().css('padding', '10px').css('backgroundColor', 'white');
-	body.css('overflow', 'visible').css('backgroundColor', 'white');
-	body.find('tbody tr').find('td:first').each(function (n, el) {
-		var status = tests[n] || '';
-		var tr = $(el).parent();
-		if (status == 'Passed') {
-			tr.css('backgroundColor', 'rgb(223, 240, 216)');
-		}
-		else if (status == 'Failed') {
-			tr.css('backgroundColor', 'rgb(242, 222, 222)');
-		}
 	});
 }
 
