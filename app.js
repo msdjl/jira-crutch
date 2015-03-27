@@ -8,6 +8,7 @@ var https = require('https');
 var request = require('request');
 var app = express();
 var JiraApi = require('jira').JiraApi;
+var jiraBaseUrl = 'jira.returnonintelligence.com';
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/test', { keepAlive: 1 });
 var db = mongoose.connection;
@@ -68,6 +69,9 @@ app.use(function (req, res, next) {
 app.use(function (req, res, next) {
 	var c = req.session.credentials;
 	if (req.url.indexOf('/login') == 0 || req.url.indexOf('/logout') == 0 || (c && c.isAuthorized)) {
+		if (req.url.indexOf('/login') != 0) {
+			req.jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
+		}
 		next();
 	}
 	else {
@@ -84,9 +88,7 @@ app.get('/isAuthorized', function (req, res) {
 
 app.get('/rest/api/latest/search', function (req, res) {
 	var jql = req.query.jql;
-	var c = req.session.credentials;
-	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-	jira.searchJira(jql, { maxResults: 1000, fields: ['summary', 'description', 'customfield_13342'] }, function(error, result) {
+	req.jira.searchJira(jql, { maxResults: 1000, fields: ['summary', 'description', 'customfield_13342'] }, function(error, result) {
 		if (error) {
 			res.status(400).end(error);
 			return true;
@@ -98,21 +100,15 @@ app.get('/rest/api/latest/search', function (req, res) {
 app.post('/login', function (req, res) {
 	var username = req.body.username || '';
 	var password = req.body.password || '';
-	var protocol = req.body.protocol || 'https';
-	var hostname = req.body.hostname || 'jira.returnonintelligence.com';
-	var port = req.body.port || 443;
-	var apiVersion = req.body.apiVersion || 2;
-
 	var c = req.session.credentials = {
 		username: username,
 		password: password,
-		protocol: protocol,
-		port: port,
-		hostname: hostname,
-		apiVersion: apiVersion,
+		protocol: 'https',
+		port: 443,
+		hostname: jiraBaseUrl,
+		apiVersion: 2,
 		isAuthorized: false
 	};
-
 	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
 	jira.getCurrentUser(function (error, user) {
 		if (error) {
@@ -132,9 +128,7 @@ app.post('/logout', function (req, res) {
 });
 
 app.get('/rest/api/latest/issue/:id', function (req, res) {
-	var c = req.session.credentials;
-	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-	jira.findIssue(req.params.id, function(error, issue) {
+	req.jira.findIssue(req.params.id, function(error, issue) {
 		if (error) {
 			res.status(400).end(error);
 			return true;
@@ -144,14 +138,12 @@ app.get('/rest/api/latest/issue/:id', function (req, res) {
 });
 
 app.post('/rest/api/latest/subtask', function (req, res) {
-	var c = req.session.credentials;
 	var s = req.body.issue;
 	if (!s) {
 		res.status(400).end('missing parameter');
 		return true;
 	}
-	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-	jira.addNewIssue(s, function(error, issue) {
+	req.jira.addNewIssue(s, function(error, issue) {
 		if (error) {
 			res.status(400).json(error);
 			return true;
@@ -181,8 +173,7 @@ app.post('/testcomment', function (req, res) {
 		res.status(400).end('missing parameters');
 		return;
 	}
-	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-	jira.addComment(issueKey, comment, function(error) {
+	req.jira.addComment(issueKey, comment, function(error) {
 		if (error) {
 			res.status(400).json(error);
 			return true;
@@ -198,7 +189,6 @@ app.post('/testcomment', function (req, res) {
 
 app.post('/testchangestatus', function (req, res) {
 	var newStatusId;
-	var c = req.session.credentials;
 	var issueKey = req.body.issueKey;
 	var status = req.body.status;
 	var statusIds = {
@@ -216,8 +206,7 @@ app.post('/testchangestatus', function (req, res) {
 			id: newStatusId
 		}
 	};
-	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-	jira.transitionIssue(issueKey, newSettings, function(error) {
+	req.jira.transitionIssue(issueKey, newSettings, function(error) {
 		if (error) {
 			res.status(400).json(error);
 			return true;
@@ -335,7 +324,7 @@ function attachScreenshot (pageId, pageVersion, issueKey, credentials, img, cb) 
 		}
 	};
 	request.post({
-		url: 'https://' + c.username + ':' + c.password + '@jira.returnonintelligence.com/rest/api/2/issue/' + issueKey + '/attachments',
+		url: 'https://' + c.username + ':' + c.password + '@' + jiraBaseUrl + '/rest/api/2/issue/' + issueKey + '/attachments',
 		formData: formData,
 		headers: {
 			'X-Atlassian-Token': 'nocheck'
