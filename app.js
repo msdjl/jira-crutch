@@ -3,7 +3,6 @@ var session = require('express-session');
 var path = require('path');
 var logger = require('morgan');
 var compress = require('compression');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var https = require('https');
 var request = require('request');
@@ -51,7 +50,6 @@ app.use(logger('dev'));
 app.use(compress());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function (req, res, next) {
@@ -74,7 +72,6 @@ app.use(function (req, res, next) {
 	}
 	else {
 		res.status(401).end('Unauthorized!');
-		return true;
 	}
 });
 
@@ -125,16 +122,12 @@ app.post('/login', function (req, res) {
 		}
 		c.isAuthorized = true;
 		c.displayName = user.name;
-		res.cookie('displayName', c.displayName);
-		res.cookie('isAuthorized', true);
 		res.end('ok');
 	});
 });
 
 app.post('/logout', function (req, res) {
 	req.session.destroy();
-	res.clearCookie('isAuthorized');
-	res.clearCookie('displayName');
 	res.end('ok');
 });
 
@@ -208,19 +201,15 @@ app.post('/testchangestatus', function (req, res) {
 	var c = req.session.credentials;
 	var issueKey = req.body.issueKey;
 	var status = req.body.status;
+	var statusIds = {
+		'Passed': '51',
+		'Failed': '201'
+	};
 	if (!issueKey || !status) {
-		res.status(400).end('missing parameters');
-		return;
+		return res.status(400).end('missing parameters');
 	}
-	if (status == 'Passed') {
-		newStatusId = '51';
-	}
-	else if (status == 'Failed') {
-		newStatusId = '201';
-	}
-	else {
-		res.status(400).end('incorrect status');
-		return;
+	if (!(newStatusId = statusIds[status])) {
+		return res.status(400).end('incorrect status');
 	}
 	var newSettings = {
 		transition: {
@@ -238,7 +227,6 @@ app.post('/testchangestatus', function (req, res) {
 });
 
 app.get('/gettests', function (req, res) {
-	var c = req.session.credentials;
 	var pageId = req.query.pageId;
 	var pageVersion = req.query.pageVersion;
 	var issueKey = req.query.issueKey;
@@ -262,7 +250,6 @@ app.get('/gettests', function (req, res) {
 });
 
 app.post('/savetest', function (req, res) {
-	var c = req.session.credentials;
 	var test;
 	var pageId = req.body.pageId;
 	var pageVersion = req.body.pageVersion;
