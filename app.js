@@ -42,11 +42,11 @@ app.use(session({
 }));
 
 app
-.use(logger('dev'))
-.use(compress())
-.use(bodyParser.json({ limit: '10mb' }))
-.use(bodyParser.urlencoded({ limit: '10mb', extended: false }))
-.use(express.static(path.join(__dirname, 'public')));
+	.use(logger('dev'))
+	.use(compress())
+	.use(bodyParser.json({ limit: '10mb' }))
+	.use(bodyParser.urlencoded({ limit: '10mb', extended: false }))
+	.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function (req, res, next) {
 	res.set({
@@ -55,7 +55,7 @@ app.use(function (req, res, next) {
 		'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',
 		'Access-Control-Allow-Headers': 'Origin, Accept, Content-Type, Authorization, Content-Length, X-Requested-With'
 	});
-	('OPTIONS' === req.method?res.status(200).end():next());
+	('OPTIONS' === req.method ? res.status(200).end() : next());
 });
 
 app.use(function (req, res, next) {
@@ -219,13 +219,12 @@ app.get('/gettests', function (req, res) {
 			res.status(500).end(err);
 			return;
 		}
-		res.json({tests: (doc?doc.tests:{})});
+		res.json({tests: (doc ? doc.tests : {})});
 	});
 });
 
 app.post('/savetest', function (req, res) {
-	var test,
-	pageId = req.body.pageId,
+	var pageId = req.body.pageId,
 	pageVersion = req.body.pageVersion,
 	issueKey = req.body.issueKey,
 	testId = req.body.testId,
