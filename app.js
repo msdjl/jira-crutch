@@ -14,28 +14,21 @@ mongoose.connect('mongodb://localhost/test', { keepAlive: 1 });
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
-var testSchema = mongoose.Schema({
-	testId: String,
-	testStatus: String,
-	createdAt: {type: Date, default: Date.now},
-	updatedAt: Date,
-	context: {type: mongoose.Schema.Types.ObjectId, ref: 'Context'}
-});
-testSchema.pre('save', function (next) {
-	this.updatedAt = new Date();
-	next();
-});
-
-var contextSchema = mongoose.Schema({
+var checklistSchema = mongoose.Schema({
 	issueKey: String,
 	pageId: Number,
 	pageVersion: Number,
 	createdAt: {type: Date, default: Date.now},
-	tests: [{type: mongoose.Schema.Types.ObjectId, ref: 'Test'}]
+	updatedAt: {type: Date, default: Date.now},
+	tests: {type: mongoose.Schema.Types.Mixed, default: {}}
+});
+checklistSchema.pre('save', function (next) {
+	this.updatedAt = new Date();
+	this.markModified('tests');
+	next();
 });
 
-var Test = mongoose.model('Test', testSchema);
-var Context = mongoose.model('Context', contextSchema);
+var Checklist = mongoose.model('Checklist', checklistSchema);
 
 var MongoStore = require('connect-mongo')(session);
 app.use(session({
@@ -162,7 +155,7 @@ app.post('/rest/api/latest/subtask', function (req, res) {
 	});
 });
 
-app.post('/testcomment', function (req, res) {
+app.post('/generatereport', function (req, res) {
 	var c = req.session.credentials;
 	var pageId = req.body.pageId;
 	var pageVersion = req.body.pageVersion;
@@ -187,7 +180,7 @@ app.post('/testcomment', function (req, res) {
 	});
 });
 
-app.post('/testchangestatus', function (req, res) {
+app.post('/changetestatus', function (req, res) {
 	var newStatusId;
 	var issueKey = req.body.issueKey;
 	var status = req.body.status;
@@ -223,8 +216,7 @@ app.get('/gettests', function (req, res) {
 		res.status(400).end('missing parameters');
 		return;
 	}
-	Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey})
-	.populate({path: 'tests', select: 'testId testStatus'}).exec(function (err, doc) {
+	Checklist.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}, function (err, doc) {
 		if (err) {
 			res.status(500).end(err);
 			return;
@@ -233,7 +225,7 @@ app.get('/gettests', function (req, res) {
 			res.json({tests: doc.tests});
 		}
 		else {
-			res.json({});
+			res.json({tests: {}});
 		}
 	});
 });
@@ -249,65 +241,20 @@ app.post('/savetest', function (req, res) {
 		res.status(400).end('missing parameters');
 		return;
 	}
-	Context.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey})
-		.populate({path: 'tests', match: {testId: testId}}).exec(function (err, doc) {
+	Checklist.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}, function (err, checklist) {
 		if (err) {
 			res.status(500).end(err);
 			return;
 		}
-		if (doc) {
-			if (doc.tests[0]) {
-				doc.tests[0].testStatus = testStatus;
-				doc.tests[0].save(function (err, test) {
-					if (err) {
-						res.status(500).end(err);
-						return;
-					}
-					res.json({ testId: test.testId, testStatus: test.testStatus });
-				});
+		checklist = checklist || new Checklist({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey});
+		checklist.tests[testId] = testStatus;
+		checklist.save(function (err, doc) {
+			if (err) {
+				res.status(500).end(err);
+				return;
 			}
-			else {
-				test = new Test({testId: testId, testStatus: testStatus, context: doc});
-				test.save(function (err, test) {
-					if (err) {
-						res.status(500).end(err);
-						return;
-					}
-					doc.tests.push(test);
-					doc.save(function (err, doc) {
-						if (err) {
-							res.status(500).end(err);
-							return;
-						}
-						res.json({ testId: test.testId, testStatus: test.testStatus });
-					});
-				});
-			}
-		}
-		else {
-			var context = Context({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey});
-			context.save(function (err, doc) {
-				if (err) {
-					res.status(500).end(err);
-					return;
-				}
-				test = new Test({testId: testId, testStatus: testStatus, context: doc});
-				test.save(function (err, test) {
-					if (err) {
-						res.status(500).end(err);
-						return;
-					}
-					doc.tests.push(test);
-					doc.save(function (err, doc) {
-						if (err) {
-							res.status(500).end(err);
-							return;
-						}
-						res.json({ testId: test.testId, testStatus: test.testStatus });
-					});
-				});
-			});
-		}
+			res.json({ testId: doc.testId, testStatus: doc.testStatus });
+		});
 	});
 });
 
@@ -324,14 +271,13 @@ function attachScreenshot (pageId, pageVersion, issueKey, credentials, img, cb) 
 		}
 	};
 	request.post({
-		url: 'https://' + c.username + ':' + c.password + '@' + jiraBaseUrl + '/rest/api/2/issue/' + issueKey + '/attachments',
+		url: 'https://' + jiraBaseUrl + '/rest/api/2/issue/' + issueKey + '/attachments',
 		formData: formData,
 		headers: {
-			'X-Atlassian-Token': 'nocheck'
+			'X-Atlassian-Token': 'nocheck',
+			'Authorization': 'Basic ' + new Buffer(c.username + ':' + c.password).toString('base64')
 		}
-	}, function (error, response, body) {
-		cb(error);
-	});
+	}, cb);
 }
 
 // catch 404 and forward to error handler
