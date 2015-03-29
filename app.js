@@ -41,11 +41,12 @@ app.use(session({
 	})
 }));
 
-app.use(logger('dev'));
-app.use(compress());
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
-app.use(express.static(path.join(__dirname, 'public')));
+app
+.use(logger('dev'))
+.use(compress())
+.use(bodyParser.json({ limit: '10mb' }))
+.use(bodyParser.urlencoded({ limit: '10mb', extended: false }))
+.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function (req, res, next) {
 	res.set({
@@ -89,18 +90,16 @@ app.get('/rest/api/latest/search', function (req, res) {
 });
 
 app.post('/login', function (req, res) {
-	var username = req.body.username || '';
-	var password = req.body.password || '';
 	var c = req.session.credentials = {
-		username: username,
-		password: password,
+		username: req.body.username || '',
+		password: req.body.password || '',
 		protocol: 'https',
 		port: 443,
 		hostname: jiraBaseUrl,
 		apiVersion: 2,
 		isAuthorized: false
-	};
-	var jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
+	},
+	jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
 	jira.getCurrentUser(function (error, user) {
 		if (error) {
 			console.log(error);
@@ -154,12 +153,12 @@ app.post('/rest/api/latest/subtask', function (req, res) {
 });
 
 app.post('/generatereport', function (req, res) {
-	var c = req.session.credentials;
-	var pageId = req.body.pageId;
-	var pageVersion = req.body.pageVersion;
-	var issueKey = req.body.issueKey;
-	var comment = req.body.comment;
-	var img = req.body.img;
+	var c = req.session.credentials,
+		pageId = req.body.pageId,
+		pageVersion = req.body.pageVersion,
+		issueKey = req.body.issueKey,
+		comment = req.body.comment,
+		img = req.body.img;
 	if (!pageId || !pageVersion || !issueKey || !comment) {
 		res.status(400).end('missing parameters');
 		return;
@@ -179,13 +178,14 @@ app.post('/generatereport', function (req, res) {
 });
 
 app.post('/changetestatus', function (req, res) {
-	var newStatusId;
-	var issueKey = req.body.issueKey;
-	var status = req.body.status;
-	var statusIds = {
-		'Passed': '51',
-		'Failed': '201'
-	};
+	var newStatusId,
+		issueKey = req.body.issueKey,
+		status = req.body.status,
+		statusIds = {
+			'Passed': '51',
+			'Failed': '201'
+		};
+
 	if (!issueKey || !status) {
 		return res.status(400).end('missing parameters');
 	}
@@ -207,9 +207,9 @@ app.post('/changetestatus', function (req, res) {
 });
 
 app.get('/gettests', function (req, res) {
-	var pageId = req.query.pageId;
-	var pageVersion = req.query.pageVersion;
-	var issueKey = req.query.issueKey;
+	var pageId = req.query.pageId,
+		pageVersion = req.query.pageVersion,
+		issueKey = req.query.issueKey;
 	if (!pageId || !pageVersion || !issueKey) {
 		res.status(400).end('missing parameters');
 		return;
@@ -219,22 +219,17 @@ app.get('/gettests', function (req, res) {
 			res.status(500).end(err);
 			return;
 		}
-		if (doc) {
-			res.json({tests: doc.tests});
-		}
-		else {
-			res.json({tests: {}});
-		}
+		res.json({tests: (doc?doc.tests:{})});
 	});
 });
 
 app.post('/savetest', function (req, res) {
-	var test;
-	var pageId = req.body.pageId;
-	var pageVersion = req.body.pageVersion;
-	var issueKey = req.body.issueKey;
-	var testId = req.body.testId;
-	var testStatus = req.body.testStatus || '';
+	var test,
+	pageId = req.body.pageId,
+	pageVersion = req.body.pageVersion,
+	issueKey = req.body.issueKey,
+	testId = req.body.testId,
+	testStatus = req.body.testStatus || '';
 	if (!pageId || !pageVersion || !issueKey || !testId) {
 		res.status(400).end('missing parameters');
 		return;
