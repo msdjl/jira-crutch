@@ -37,7 +37,7 @@ app.controller ('appCtrl', ['$rootScope','$scope', '$location', '$http', functio
 				$location.path('/login');
 			}
 		}
-		$('#expander.collapsed').click();
+		$('#expander:not(.collapsed)').click();
 	});
 
 	//TODO: move this to directive
