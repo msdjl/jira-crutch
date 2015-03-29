@@ -1,15 +1,16 @@
-var express = require('express');
-var session = require('express-session');
-var path = require('path');
-var logger = require('morgan');
-var compress = require('compression');
-var bodyParser = require('body-parser');
-var https = require('https');
-var request = require('request');
-var app = express();
-var JiraApi = require('jira').JiraApi;
-var jiraBaseUrl = 'jira.returnonintelligence.com';
-var mongoose = require('mongoose');
+var express = require('express'),
+	session = require('express-session'),
+	path = require('path'),
+	logger = require('morgan'),
+	compress = require('compression'),
+	bodyParser = require('body-parser'),
+	https = require('https'),
+	request = require('request'),
+	app = express(),
+	JiraApi = require('jira').JiraApi,
+	jiraBaseUrl = 'jira.returnonintelligence.com',
+	mongoose = require('mongoose');
+
 mongoose.connect('mongodb://localhost/test', { keepAlive: 1 });
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -47,16 +48,13 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function (req, res, next) {
-	res.header("Access-Control-Allow-Origin", req.headers.origin);
-	res.header("Access-Control-Allow-Credentials", "true");
-	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-	res.header('Access-Control-Allow-Headers', 'Origin, Accept, Content-Type, Authorization, Content-Length, X-Requested-With');
-	if ('OPTIONS' == req.method) {
-		res.status(200).end();
-	}
-	else {
-		next();
-	}
+	res.set({
+		"Access-Control-Allow-Origin": req.headers.origin,
+		"Access-Control-Allow-Credentials": "true",
+		'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',
+		'Access-Control-Allow-Headers': 'Origin, Accept, Content-Type, Authorization, Content-Length, X-Requested-With'
+	});
+	('OPTIONS' === req.method?res.status(200).end():next());
 });
 
 app.use(function (req, res, next) {
