@@ -21,7 +21,7 @@ var app = angular.module ('app', ['ngRoute']).config(['$routeProvider', function
 
 }]);
 
-app.controller ('appCtrl', ['$scope', '$location', '$http', function ($scope, $location, $http) {
+app.controller ('appCtrl', ['$rootScope','$scope', '$location', '$http', function ($rootScope, $scope, $location, $http) {
 	$scope.isAuthorized = true;
 	$http({method: 'GET', url: '/isAuthorized'}).success(function() {
 		$scope.isAuthorized = true;
@@ -37,12 +37,14 @@ app.controller ('appCtrl', ['$scope', '$location', '$http', function ($scope, $l
 				$location.path('/login');
 			}
 		}
-		var expander = $('#expander');
-		if (!expander.hasClass('collapsed')) {
-			expander.click();
-		}
+		$('#expander.collapsed').click();
 	});
 
+	//TODO: move this to directive
+	$rootScope.toggleBtns = function(state) {
+		var btns = $('#overlap, #throbber');
+		(state?btns.show():btns.hide());
+	};
 }]);
 
 app.factory ('AuthService', function () {
@@ -77,17 +79,15 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 		$scope.showSettings = !$scope.showSettings;
 	};
 	$scope.findIssues = function () {
-		$('#overlap').show();
-		$('#throbber').show();
+		$scope.toggleBtns(true);
 		$http({method: 'GET', url: '/rest/api/latest/search?jql=' + $scope.query}).success(function() {
 			$scope.jout = arguments[0];
-			$('#overlap').hide();
-			$('#throbber').hide();
 		}).error(function() {
-			$('#overlap').hide();
-			$('#throbber').hide();
 			console.log(arguments);
 			alert('error');
+		})
+		.finally(function() {
+			$scope.toggleBtns(false);
 		});
 	};
 	$scope.extendDelimiters = function (arr) {
@@ -121,14 +121,14 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 		};
 	};
 	$scope.getPreconditions = function (text) {
-		text = text || "";
+		text || (text = "");
 		var res,
 			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters);
 		res = text.substring(0, st_pos.start != -1 ? st_pos.start : undefined);
 		return res;
 	};
 	$scope.getSteps = function (text) {
-		text = text || "";
+		text || (text = "");
 		var res,
 			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters),
 			er_pos = $scope.getDelimiterPosition(text, $scope.er_Delimiters, st_pos.start != -1 ? st_pos.end : undefined);
@@ -136,7 +136,7 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 		return res;
 	};
 	$scope.getERs = function (text) {
-		text = text || "";
+		text || (text = "");
 		var res,
 			st_pos = $scope.getDelimiterPosition(text, $scope.steps_Delimiters),
 			er_pos = $scope.getDelimiterPosition(text, $scope.er_Delimiters, st_pos.start != -1 ? st_pos.end : undefined);
@@ -163,22 +163,20 @@ app.controller ('HomeController', ['$scope', '$http', '$location', function ($sc
 
 app.controller ('LoginController', ['$scope', '$http', '$location', function ($scope, $http, $location) {
 	$scope.login = function () {
-		$('#overlap').show();
-		$('#throbber').show();
+		$scope.toggleBtns(true);
 		$http({method: 'POST', url: '/login/', data: {
 			username: $scope.username,
 			password: $scope.password
 		}}).success(function() {
-			$('#overlap').hide();
-			$('#throbber').hide();
 			$scope.$parent.isAuthorized = true;
 			$location.path('/');
 		}).error(function() {
-			$('#overlap').hide();
-			$('#throbber').hide();
 			$scope.$parent.isAuthorized = false;
 			alert('error');
 			console.log(arguments);
+		})
+		.finally(function() {
+			$scope.toggleBtns(false);
 		});
 	};
 }]);
@@ -267,8 +265,7 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 		var main = $scope.issue;
 		console.log($scope.subtasks.length + ' subtask need create');
 		if ($scope.subtasks.length > 0) {
-			$('#overlap').show();
-			$('#throbber').show();
+			$scope.toggleBtns(true);
 			for (var i in $scope.subtasks) {
 				var sub = $scope.subtasks[i];
 				var priorityVals = {
@@ -305,23 +302,20 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 					}
 				};
 
-				$http({method: 'POST', url: '/rest/api/latest/subtask/', data: {issue: newSub}}).success(function () {
-					$scope.resps++;
-					$scope.dynamic++;
-					if ($scope.reqs == $scope.resps) {
-						$('#throbber').hide();
-						$('#overlap').hide();
-					}
+				$http({method: 'POST', url: '/rest/api/latest/subtask/', data: {issue: newSub}})
+				.success(function () {
 					console.log(Math.round($scope.resps * (100 / $scope.reqs)) + '%');
-				}).error(function (err) {
+				})
+				.error(function (err) {
 					console.log(err);
+					console.log(Math.round($scope.resps * (100 / $scope.reqs)) + '%');
+				})
+				.finally(function() {
 					$scope.resps++;
 					$scope.dynamic++;
 					if ($scope.reqs == $scope.resps) {
-						$('#throbber').hide();
-						$('#overlap').hide();
+						$scope.toggleBtns(false);
 					}
-					console.log(Math.round($scope.resps * (100 / $scope.reqs)) + '%');
 				});
 			}
 		}
@@ -330,18 +324,18 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 		}
 	};
 
-	$('#overlap').show();
-	$('#throbber').show();
-	$http({method: 'GET', url: '/rest/api/latest/issue/' + $routeParams.issue}).success(function() {
+	$scope.toggleBtns(true);
+	$http({method: 'GET', url: '/rest/api/latest/issue/' + $routeParams.issue})
+	.success(function() {
 		$scope.issue = arguments[0];
 		$scope.addSubtask(true);
-		$('#overlap').hide();
-		$('#throbber').hide();
-	}).error(function() {
-		$('#overlap').hide();
-		$('#throbber').hide();
+	})
+	.error(function() {
 		console.log(arguments);
 		alert('error');
 		$location.path('/');
+	})
+	.finally(function() {
+		$scope.toggleBtns(false);
 	});
 }]);
