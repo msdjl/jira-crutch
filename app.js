@@ -273,20 +273,10 @@ app.use(function(req, res, next) {
 	next(err);
 });
 
-// error handlers
-
-// development error handler
+// error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
-	app.use(function(err, req, res, next) {
-		res.status(err.status || 500).json(err);
-	});
-}
-
-// production error handler
-// no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-	res.status(err.status || 500).end(err.message);
+	res.status(err.status || 500).json(err);
 });
 
 module.exports = app;
