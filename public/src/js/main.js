@@ -41,26 +41,11 @@ app.controller ('appCtrl', ['$rootScope','$scope', '$location', '$http', functio
 	});
 
 	//TODO: move this to directive
-	$rootScope.toggleBtns = function(state) {
-		var btns = $('#overlap, #throbber');
-		(state?btns.show():btns.hide());
+	$rootScope.toggleThrobber = function(state) {
+		var throbber = $('#overlap, #throbber');
+		(state ? throbber.show() : throbber.hide());
 	};
 }]);
-
-app.factory ('AuthService', function () {
-	var isAuthenticated = false;
-	return {
-		isAuthorized: function () {
-			return isAuthenticated;
-		},
-		login: function () {
-			isAuthenticated = true;
-		},
-		logout: function () {
-			isAuthenticated = false;
-		}
-	}
-});
 
 app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope, $http) {
 	$scope.query = '';
@@ -79,7 +64,7 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 		$scope.showSettings = !$scope.showSettings;
 	};
 	$scope.findIssues = function () {
-		$scope.toggleBtns(true);
+		$scope.toggleThrobber(true);
 		$http({method: 'GET', url: '/rest/api/latest/search?jql=' + $scope.query}).success(function() {
 			$scope.jout = arguments[0];
 		}).error(function() {
@@ -87,7 +72,7 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 			alert('error');
 		})
 		.finally(function() {
-			$scope.toggleBtns(false);
+			$scope.toggleThrobber(false);
 		});
 	};
 	$scope.extendDelimiters = function (arr) {
@@ -163,7 +148,7 @@ app.controller ('HomeController', ['$scope', '$http', '$location', function ($sc
 
 app.controller ('LoginController', ['$scope', '$http', '$location', function ($scope, $http, $location) {
 	$scope.login = function () {
-		$scope.toggleBtns(true);
+		$scope.toggleThrobber(true);
 		$http({method: 'POST', url: '/login/', data: {
 			username: $scope.username,
 			password: $scope.password
@@ -176,7 +161,7 @@ app.controller ('LoginController', ['$scope', '$http', '$location', function ($s
 			console.log(arguments);
 		})
 		.finally(function() {
-			$scope.toggleBtns(false);
+			$scope.toggleThrobber(false);
 		});
 	};
 }]);
@@ -265,7 +250,7 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 		var main = $scope.issue;
 		console.log($scope.subtasks.length + ' subtask need create');
 		if ($scope.subtasks.length > 0) {
-			$scope.toggleBtns(true);
+			$scope.toggleThrobber(true);
 			for (var i in $scope.subtasks) {
 				var sub = $scope.subtasks[i];
 				var priorityVals = {
@@ -314,7 +299,7 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 					$scope.resps++;
 					$scope.dynamic++;
 					if ($scope.reqs == $scope.resps) {
-						$scope.toggleBtns(false);
+						$scope.toggleThrobber(false);
 					}
 				});
 			}
@@ -324,7 +309,7 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 		}
 	};
 
-	$scope.toggleBtns(true);
+	$scope.toggleThrobber(true);
 	$http({method: 'GET', url: '/rest/api/latest/issue/' + $routeParams.issue})
 	.success(function() {
 		$scope.issue = arguments[0];
@@ -336,6 +321,6 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 		$location.path('/');
 	})
 	.finally(function() {
-		$scope.toggleBtns(false);
+		$scope.toggleThrobber(false);
 	});
 }]);
