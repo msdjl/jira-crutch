@@ -142,13 +142,8 @@ app.post('/rest/api/latest/subtask', function (req, res) {
 			fields: {
 				priority: s.fields.priority
 			}
-		}, function (error, resp) {
-			if (error) {
-				res.status(400).json(error);
-				return true;
-			}
-			res.json(issue);
 		});
+		res.json(issue);
 	});
 });
 
