@@ -59,33 +59,15 @@ app.use(function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
-	var c = req.session.credentials;
-	if (req.url.indexOf('/login') == 0 || req.url.indexOf('/logout') == 0 || (c && c.isAuthorized)) {
-		if (req.url.indexOf('/login') != 0) {
-			req.jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
-		}
-		next();
-	}
-	else {
-		res.status(401).end('Unauthorized!');
-	}
+	var c = req.session.credentials,
+		allowed = (req.url.indexOf('/login') == 0 || req.url.indexOf('/logout') == 0 || (c && c.isAuthorized));
+	(allowed ? next() : res.status(401).end('Unauthorized!'));
 });
 
 app.get('/isAuthorized', function (req, res) {
 	res.json({
 		isAuthorized: true,
 		name: req.session.credentials.displayName
-	});
-});
-
-app.get('/rest/api/latest/search', function (req, res) {
-	var jql = req.query.jql;
-	req.jira.searchJira(jql, { maxResults: 1000, fields: ['summary', 'description', 'customfield_13342'] }, function(error, result) {
-		if (error) {
-			res.status(400).end(error);
-			return true;
-		}
-		res.json(result);
 	});
 });
 
@@ -115,6 +97,23 @@ app.post('/login', function (req, res) {
 app.post('/logout', function (req, res) {
 	req.session.destroy();
 	res.end('ok');
+});
+
+app.use(function (req, res, next) {
+	var c = req.session.credentials;
+	req.jira = new JiraApi(c.protocol, c.hostname, c.port, c.username, c.password, c.apiVersion);
+	next();
+});
+
+app.get('/rest/api/latest/search', function (req, res) {
+	var jql = req.query.jql;
+	req.jira.searchJira(jql, { maxResults: 1000, fields: ['summary', 'description', 'customfield_13342'] }, function(error, result) {
+		if (error) {
+			res.status(400).end(error);
+			return true;
+		}
+		res.json(result);
+	});
 });
 
 app.get('/rest/api/latest/issue/:id', function (req, res) {
