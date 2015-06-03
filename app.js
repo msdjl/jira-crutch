@@ -2,61 +2,21 @@ var express = require('express'),
 	session = require('express-session'),
 	path = require('path'),
 	logger = require('morgan'),
-	compress = require('compression'),
 	bodyParser = require('body-parser'),
-	https = require('https'),
-	request = require('request'),
 	app = express(),
 	JiraApi = require('jira').JiraApi,
-	jiraBaseUrl = 'jira.returnonintelligence.com',
-	mongoose = require('mongoose');
+	jiraBaseUrl = 'jira.returnonintelligence.com';
 
-mongoose.connect('mongodb://localhost/test', { keepAlive: 1 });
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-
-var checklistSchema = mongoose.Schema({
-	issueKey: String,
-	pageId: Number,
-	pageVersion: Number,
-	createdAt: {type: Date, default: Date.now},
-	updatedAt: {type: Date, default: Date.now},
-	tests: {type: mongoose.Schema.Types.Mixed, default: {}}
-});
-checklistSchema.pre('save', function (next) {
-	this.updatedAt = new Date();
-	this.markModified('tests');
-	next();
-});
-
-var Checklist = mongoose.model('Checklist', checklistSchema);
-
-var MongoStore = require('connect-mongo')(session);
 app.use(session({
-	secret: 'superSecret',
-	resave: false,
-	saveUninitialized: false,
-	store: new MongoStore({
-		url: 'mongodb://localhost/test'
-	})
-}));
+		secret: 'superSecret',
+		resave: false,
+		saveUninitialized: false
+	}));
 
 app
 	.use(logger('dev'))
-	.use(compress())
-	.use(bodyParser.json({ limit: '10mb' }))
-	.use(bodyParser.urlencoded({ limit: '10mb', extended: false }))
+	.use(bodyParser.json())
 	.use(express.static(path.join(__dirname, 'public')));
-
-app.use(function (req, res, next) {
-	res.set({
-		"Access-Control-Allow-Origin": req.headers.origin,
-		"Access-Control-Allow-Credentials": "true",
-		'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',
-		'Access-Control-Allow-Headers': 'Origin, Accept, Content-Type, Authorization, Content-Length, X-Requested-With'
-	});
-	('OPTIONS' === req.method ? res.status(200).end() : next());
-});
 
 app.use(function (req, res, next) {
 	var c = req.session.credentials,
@@ -145,126 +105,6 @@ app.post('/rest/api/latest/subtask', function (req, res) {
 		res.json(issue);
 	});
 });
-
-app.post('/generatereport', function (req, res) {
-	var c = req.session.credentials,
-		pageId = req.body.pageId,
-		pageVersion = req.body.pageVersion,
-		issueKey = req.body.issueKey,
-		comment = req.body.comment,
-		img = req.body.img;
-	if (!pageId || !pageVersion || !issueKey || !comment) {
-		res.status(400).end('missing parameters');
-		return;
-	}
-	req.jira.addComment(issueKey, comment, function(error) {
-		if (error) {
-			res.status(400).json(error);
-			return true;
-		}
-		attachScreenshot (pageId, pageVersion, issueKey, c, img, function (err) {
-			if (err) {
-				console.log('attachScreenshot', err);
-			}
-		});
-		res.json({issueKey: issueKey, comment: comment});
-	});
-});
-
-app.post('/changetestatus', function (req, res) {
-	var newStatusId,
-		issueKey = req.body.issueKey,
-		status = req.body.status,
-		statusIds = {
-			'Passed': '51',
-			'Failed': '201'
-		};
-
-	if (!issueKey || !status) {
-		return res.status(400).end('missing parameters');
-	}
-	if (!(newStatusId = statusIds[status])) {
-		return res.status(400).end('incorrect status');
-	}
-	var newSettings = {
-		transition: {
-			id: newStatusId
-		}
-	};
-	req.jira.transitionIssue(issueKey, newSettings, function(error) {
-		if (error) {
-			res.status(400).json(error);
-			return true;
-		}
-		res.json({issueKey: issueKey});
-	});
-});
-
-app.get('/gettests', function (req, res) {
-	var pageId = req.query.pageId,
-		pageVersion = req.query.pageVersion,
-		issueKey = req.query.issueKey;
-	if (!pageId || !pageVersion || !issueKey) {
-		res.status(400).end('missing parameters');
-		return;
-	}
-	Checklist.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}, function (err, doc) {
-		if (err) {
-			res.status(500).end(err);
-			return;
-		}
-		res.json({tests: (doc ? doc.tests : {})});
-	});
-});
-
-app.post('/savetest', function (req, res) {
-	var pageId = req.body.pageId,
-	pageVersion = req.body.pageVersion,
-	issueKey = req.body.issueKey,
-	testId = req.body.testId,
-	testStatus = req.body.testStatus || '';
-	if (!pageId || !pageVersion || !issueKey || !testId) {
-		res.status(400).end('missing parameters');
-		return;
-	}
-	Checklist.findOne({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey}, function (err, checklist) {
-		if (err) {
-			res.status(500).end(err);
-			return;
-		}
-		checklist = checklist || new Checklist({pageId: pageId, pageVersion: pageVersion, issueKey: issueKey});
-		checklist.tests[testId] = testStatus;
-		checklist.save(function (err, doc) {
-			if (err) {
-				res.status(500).end(err);
-				return;
-			}
-			res.json({ testId: doc.testId, testStatus: doc.testStatus });
-		});
-	});
-});
-
-function attachScreenshot (pageId, pageVersion, issueKey, credentials, img, cb) {
-	var c = credentials;
-	var b = new Buffer(img, 'base64');
-	var formData = {
-		file: {
-			value: b,
-			options: {
-				filename: issueKey + '_' + pageId + '_' + pageVersion + '.png',
-				contentType: 'image/png'
-			}
-		}
-	};
-	request.post({
-		url: 'https://' + jiraBaseUrl + '/rest/api/2/issue/' + issueKey + '/attachments',
-		formData: formData,
-		headers: {
-			'X-Atlassian-Token': 'nocheck',
-			'Authorization': 'Basic ' + new Buffer(c.username + ':' + c.password).toString('base64')
-		}
-	}, cb);
-}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

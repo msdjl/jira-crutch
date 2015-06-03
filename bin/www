@@ -1,25 +1,11 @@
 #!/usr/bin/env node
 
-var debug = require('debug')('jira-crutch');
-var fs = require('fs');
-var http = require('http');
-var https = require('https');
-var app = require('../app');
+var debug = require('debug')('jira-crutch'),
+	fs = require('fs'),
+	http = require('http'),
+	app = require('../app');
 
 app.set('port', process.env.PORT || 80);
-app.set('httpsPort', process.env.HTTPSPORT || 443);
-app.set('excludeHttps', (process.env.EXCLUDEHTTPS == 'true') || false);
-app.set('excludeHttp', (process.env.EXCLUDEHTTP == 'true') || false);
 
-if (!app.get('excludeHttp')) {
-	var httpServer = http.createServer(app);
-	httpServer.listen(app.get('port'));
-}
-
-if (!app.get('excludeHttps')) {
-	var privateKey  = fs.readFileSync('../../sslcert/ssl.key', 'utf8');
-	var certificate = fs.readFileSync('../../sslcert/ssl.crt', 'utf8');
-	var credentials = {key: privateKey, cert: certificate};
-	var httpsServer = https.createServer(credentials, app);
-	httpsServer.listen(app.get('httpsPort'));
-}
+var httpServer = http.createServer(app);
+httpServer.listen(app.get('port'));
