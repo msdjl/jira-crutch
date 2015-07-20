@@ -78,12 +78,14 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 	$scope.extendDelimiters = function (arr) {
 		var res = [], tmp = [], i;
 		for (i in arr) {
+			if (!arr.hasOwnProperty(i)) continue;
 			tmp.push('*' + arr[i] + ':*');
 			tmp.push('*' + arr[i] + '*:');
 			tmp.push('*' + arr[i] + '*');
 			tmp.push(arr[i] + ':');
 		}
 		for (i in tmp) {
+			if (!tmp.hasOwnProperty(i)) continue;
 			res.push('\n' + tmp[i] + '\n');
 			res.push('\n' + tmp[i]);
 			res.push(tmp[i] + '\n');
@@ -95,6 +97,7 @@ app.controller ('ChecklistMakerController', ['$scope', '$http', function ($scope
 		var i, pos, dels = $scope.extendDelimiters(dels_arr.split('\n'));
 		text = text || "";
 		for (i in dels) {
+			if (!dels.hasOwnProperty(i)) continue;
 			pos = text.toLowerCase().indexOf(dels[i].toLowerCase(), from);
 			if (pos != -1) {
 				break;
@@ -199,7 +202,7 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 		var filerTo = ['[tc]', '[test]', '[req]', '[auto]'];
 		var styles = ['success', 'warning', 'info', 'danger'];
 		for (var f in filerTo) {
-			if (str.indexOf(filerTo[f]) > -1)
+			if (filerTo.hasOwnProperty(f) && str.indexOf(filerTo[f]) > -1)
 				return styles[f];
 		}
 		return styles[0];
@@ -207,6 +210,7 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 
 	$scope.removeSubtask = function () {
 		for (var s in $scope.subtasks) {
+			if (!$scope.subtasks.hasOwnProperty(s)) continue;
 			if (this.subtask['$$hashKey'] == $scope.subtasks[s]['$$hashKey']) {
 				(function() {
 					$( "#subtask" + s ).animate({
@@ -229,7 +233,7 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 		var str = actual.fields.summary.toLowerCase();
 		var filerTo = ['[tc]', '[test]', '[req]', '[auto]'];
 		for (var f in filerTo) {
-			if (str.indexOf(filerTo[f]) > -1)
+			if (filerTo.hasOwnProperty(f) && str.indexOf(filerTo[f]) > -1)
 				return true;
 		}
 	};
@@ -252,6 +256,7 @@ app.controller ('IssueController', ['$scope', '$http', '$location', '$routeParam
 		if ($scope.subtasks.length > 0) {
 			$scope.toggleThrobber(true);
 			for (var i in $scope.subtasks) {
+				if (!$scope.subtasks.hasOwnProperty(i)) continue;
 				var sub = $scope.subtasks[i];
 				var priorityVals = {
 					'Blocker': '1',

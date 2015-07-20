@@ -1,12 +1,12 @@
 body {
-	padding: 60px 0px 20px 0px;
+	padding: 60px 0 20px 0;
 }
 textarea {
 	max-width: 100%;
 }
 .deleteButton {
-	top: 0px;
-	right: 0px;
+	top: 0;
+	right: 0;
 	position: absolute;
 }
 .subtask {
@@ -20,7 +20,6 @@ textarea {
 }
 .form-signin {
 	max-width: 330px;
-	/* padding: 15px; */
 	margin: 0 auto;
 }
 .form-signin .form-signin-heading,
@@ -57,8 +56,8 @@ textarea {
 #overlap {
     display: none;
     position: fixed;
-    left: 0px;
-    top: 0px;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
     z-index: 999;
